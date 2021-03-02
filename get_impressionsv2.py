@@ -104,6 +104,28 @@ def _get_split(split):
     with ThreadPoolExecutor(6) as executor:
         executor.map(f, list(range(1, n_internal_video_zips + 1)))
 
+    # clean up
+    v_ext = ".mp4"
+    p_ext = '.pkl'
+    zip_ext = '.zip'
+    zipe_ext = '.zip_ext'
+    os.makedirs(IMPRESSIONSV2_DIR / split / 'video/', exist_ok=True)
+    os.makedirs(IMPRESSIONSV2_DIR / split / 'meta/', exist_ok=True)
+    for filename in os.listdir(IMPRESSIONSV2_DIR / split):
+        if filename.endswith(v_ext):
+            shutil.move(IMPRESSIONSV2_DIR / split / filename, IMPRESSIONSV2_DIR / split / 'video' / filename)
+        elif filename.endswith(p_ext):
+            shutil.move(IMPRESSIONSV2_DIR / split / filename, IMPRESSIONSV2_DIR / split / 'meta' / filename)
+        elif filename.endswith(zip_ext) or filename.endswith(zipe_ext):
+            os.remove(IMPRESSIONSV2_DIR / split / filename)
+    if split == 'test':
+        p = IMPRESSIONSV2_DIR / split / 'test-1'
+        if p.exists():
+            p.rmdir()
+        p = IMPRESSIONSV2_DIR / split / 'test-2'
+        if p.exists():
+            p.rmdir()
+
 
 if __name__ == "__main__":
     get_impressionsv2()
