@@ -4,3 +4,4 @@ data/*
 .idea
 *.pyc
 *.npy
+*.pt
