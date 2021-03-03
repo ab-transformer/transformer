@@ -1,5 +1,4 @@
 numpy==1.20.1
-jupyterlab==3.0.8
 wget==3.2
 pandas==1.2.2
 holoviews==1.14.1
@@ -10,4 +9,5 @@ torchvision==0.8.2
 torchaudio===0.7.2
 librosa==0.8.0
 transformers==4.3.3
+fairseq==0.10.2
 ffmpeg-python==0.2.0
