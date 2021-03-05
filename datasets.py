@@ -18,17 +18,17 @@ IMPRESSIONV2_DIR = Path("/impressionv2")
 EMBEDDING_DIR = Path("/mbalazsdb")
 
 
-def load_impressionv2_dataset_all() -> List[th.utils.data.DataSet]:
+def load_impressionv2_dataset_all() -> List[th.utils.data.Dataset]:
     """Loads 3 datasets containing embeddings for ImpressionV2 for a specific split. The dataset returns tensors of
     embeddings in the following order: audio, face, text, label. The label is not an embedding but the ground truth
-    value.
+    value. All three datasets will take up 13.3 GB space in the RAM.
 
     :return: train, valid and test datasets
     """
     return [load_impressionv2_dataset_split(split) for split in ["train", "valid", "test"]]
 
 
-def load_impressionv2_dataset_split(split: str) -> th.utils.data.DataSet:
+def load_impressionv2_dataset_split(split: str) -> th.utils.data.Dataset:
     """Loads a dataset containing embeddings for ImpressionV2 for a specific split. The dataset returns tensors of
     embeddings in the following order: audio, face, text, label. The label is not an embedding but the ground truth
     value.
