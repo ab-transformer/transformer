@@ -2,7 +2,10 @@
 .vscode/
 venv
 data/*
+logs/*
+lightning_logs/*
 .idea
 *.pyc
 *.npy
 *.pt
+*ckpt

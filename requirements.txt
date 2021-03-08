@@ -9,3 +9,5 @@ torchvision==0.8.2
 torchaudio===0.7.2
 librosa==0.8.0
 transformers==4.3.3
+pytorch-lightning==1.2.2
+comet-ml==3.4.0
