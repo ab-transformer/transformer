@@ -79,7 +79,7 @@ def _get_audio(split: str, video_dirs: List[Path]) -> np.ndarray:
         with open(file, "rb") as f:
             gt_dict = pickle.load(f, encoding="latin1")
             audio_norm = gt_dict["audio_norm"]
-    return audio_norm
+    return audio_norm.astype(np.float32)
 
 
 def _create_audio(video_dirs: List[Path]) -> np.ndarray:
