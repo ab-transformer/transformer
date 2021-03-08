@@ -11,21 +11,21 @@ class MULTModel(nn.Module):
         Construct a MulT model.
         """
         super(MULTModel, self).__init__()
-        self.orig_d_l, self.orig_d_a, self.orig_d_v = hyp_params.orig_d_l, hyp_params.orig_d_a, hyp_params.orig_d_v
-        self.d_l, self.d_a, self.d_v = 30, 30, 30
-        self.vonly = hyp_params.vonly
-        self.aonly = hyp_params.aonly
-        self.lonly = hyp_params.lonly
-        self.num_heads = hyp_params.num_heads
-        self.layers = hyp_params.layers
-        self.attn_dropout = hyp_params.attn_dropout
-        self.attn_dropout_a = hyp_params.attn_dropout_a
-        self.attn_dropout_v = hyp_params.attn_dropout_v
-        self.relu_dropout = hyp_params.relu_dropout
-        self.res_dropout = hyp_params.res_dropout
-        self.out_dropout = hyp_params.out_dropout
-        self.embed_dropout = hyp_params.embed_dropout
-        self.attn_mask = hyp_params.attn_mask
+        self.orig_d_l, self.orig_d_a, self.orig_d_v = hyp_params.orig_d_l, hyp_params.orig_d_a, hyp_params.orig_d_v  # input embedding size
+        self.d_l, self.d_a, self.d_v = 30, 30, 30  # projected embedding size
+        self.vonly = hyp_params.vonly  # only visual subnetwork
+        self.aonly = hyp_params.aonly  # only audio subnetwork
+        self.lonly = hyp_params.lonly  # only text subnetwork
+        self.num_heads = hyp_params.num_heads  # number of heads multi head attention
+        self.layers = hyp_params.layers  # numer of multihead attentin layers in the encoder
+        self.attn_dropout = hyp_params.attn_dropout  # text encoder dropout
+        self.attn_dropout_a = hyp_params.attn_dropout_a  # audio encoder dropout
+        self.attn_dropout_v = hyp_params.attn_dropout_v  # visual encoder dropout
+        self.relu_dropout = hyp_params.relu_dropout  # dropout applied on the first layer of the residual block
+        self.res_dropout = hyp_params.res_dropout  # dropout applied on the residual block
+        self.out_dropout = hyp_params.out_dropout  # output layers dropout
+        self.embed_dropout = hyp_params.embed_dropout  # embedding dropout
+        self.attn_mask = hyp_params.attn_mask  # whether to apply mask on the attention weights
 
         combined_dim = self.d_l + self.d_a + self.d_v
 
