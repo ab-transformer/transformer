@@ -3,6 +3,7 @@ import argparse
 import comet_ml
 import torch as th
 import pytorch_lightning as pl
+from pytorch_lightning.callbacks import EarlyStopping
 from pytorch_lightning.loggers import CSVLogger, CometLogger
 
 from lightningmodule import MULTModelWarped
@@ -146,19 +147,23 @@ hyp_params.output_dim = label.shape[1]  # output_dim_dict.get(dataset, 1)
 model = MULTModelWarped(hyp_params, target_names)
 
 if __name__ == "__main__":
-    csv_logger = CSVLogger("logs", name="my_exp_name")
-    comet_logger = CometLogger(
-        api_key="cgss7piePhyFPXRw1J2uUEjkQ",
-        workspace="transformer",
-        project_name="find_lr",
-    )
-    trainer = pl.Trainer(
-        gpus=1,
-        max_epochs=hyp_params.num_epochs,
-        log_every_n_steps=1,
-        logger=[csv_logger, comet_logger],
-        overfit_batches=1
-    )
-    trainer.fit(model, train_dl, valid_dl)
-
-    trainer.test(test_dataloaders=test_dl)
+    for lr in [0.1, 0.01, 0.001, 0.0001, 0.00001]:
+        hyp_params.lr = lr
+        model = MULTModelWarped(hyp_params, target_names)
+        comet_logger = CometLogger(
+            api_key="cgss7piePhyFPXRw1J2uUEjkQ",
+            workspace="transformer",
+            project_name="find_lr_0_01",
+        )
+        csv_logger = CSVLogger("logs", name=comet_logger.experiment.get_key())
+        trainer = pl.Trainer(
+            gpus=1,
+            max_epochs=hyp_params.num_epochs,
+            log_every_n_steps=1,
+            callbacks=[EarlyStopping(monitor="valid_1mae", patience=10, verbose=True, mode='max')],
+            logger=[csv_logger, comet_logger],
+            limit_train_batches=0.01,
+            limit_val_batches=0.01,
+        )
+        trainer.fit(model, train_dl, valid_dl)
+        trainer.test(test_dataloaders=test_dl)
