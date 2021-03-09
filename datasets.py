@@ -18,17 +18,22 @@ IMPRESSIONV2_DIR = Path("/impressionv2")
 EMBEDDING_DIR = Path("/mbalazsdb")
 
 
-def load_impressionv2_dataset_all() -> List[th.utils.data.Dataset]:
+def load_impressionv2_dataset_all() -> Tuple[List[th.utils.data.Dataset], List[str]]:
     """Loads 3 datasets containing embeddings for ImpressionV2 for a specific split. The dataset returns tensors of
     embeddings in the following order: audio, face, text, label. The label is not an embedding but the ground truth
     value. All three datasets will take up 13.3 GB space in the RAM.
 
-    :return: train, valid and test datasets
+    :return: train, valid and test datasets in the first list and the target names in the second list
     """
-    return [load_impressionv2_dataset_split(split) for split in ["train", "valid", "test"]]
+    train_ds, train_target_names = load_impressionv2_dataset_split("train")
+    valid_ds, test_target_names = load_impressionv2_dataset_split("valid")
+    test_ds, valid_target_names = load_impressionv2_dataset_split("test")
+    assert train_target_names == valid_target_names
+    assert train_target_names == test_target_names
+    return [train_ds, valid_ds, test_ds], train_target_names
 
 
-def load_impressionv2_dataset_split(split: str) -> th.utils.data.Dataset:
+def load_impressionv2_dataset_split(split: str) -> Tuple[th.utils.data.Dataset, List[str]]:
     """Loads a dataset containing embeddings for ImpressionV2 for a specific split. The dataset returns tensors of
     embeddings in the following order: audio, face, text, label. The label is not an embedding but the ground truth
     value.
@@ -50,7 +55,7 @@ def load_impressionv2_dataset_split(split: str) -> th.utils.data.Dataset:
     face_th = th.tensor(face_np)
     text_th = th.tensor(text_np)
     label_th = th.tensor([gt[video] for video in videos])
-    return th.utils.data.TensorDataset(audio_th, face_th, text_th, label_th)
+    return th.utils.data.TensorDataset(audio_th, face_th, text_th, label_th), target_names
 
 
 def _get_gt(split: str) -> Tuple[Dict, List[str]]:

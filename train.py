@@ -122,11 +122,12 @@ hyp_params = args
 
 
 class MULTModelWarped(pl.LightningModule):
-    def __init__(self, hyp_params):
+    def __init__(self, hyp_params, target_names):
         super().__init__()
         self.model = MULTModel(hyp_params)
         self.save_hyperparameters(hyp_params)
         self.learning_rate = hyp_params.lr
+        self.target_names = target_names
 
         self.mae_1 = 1 - MeanAbsoluteError()
 
@@ -168,7 +169,7 @@ class MULTModelWarped(pl.LightningModule):
         return {f"loss": loss, f"1_mae": self.mae_1(y_hat, y)}
 
 
-train_ds, valid_ds, test_ds = load_impressionv2_dataset_all()
+[train_ds, valid_ds, test_ds], target_names = load_impressionv2_dataset_all()
 train_dl = th.utils.data.DataLoader(
     train_ds, batch_size=hyp_params.batch_size, pin_memory=True,
 )
@@ -195,7 +196,7 @@ hyp_params.v_len = face.shape[1]
 hyp_params.output_dim = label.shape[1]  # output_dim_dict.get(dataset, 1)
 # hyp_params.criterion = th.nn.L1Loss #criterion_dict.get(dataset, 'L1Loss')
 
-model = MULTModelWarped(hyp_params)
+model = MULTModelWarped(hyp_params, target_names)
 
 if __name__ == "__main__":
     csv_logger = CSVLogger("logs", name="my_exp_name")
