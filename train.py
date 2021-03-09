@@ -3,7 +3,6 @@ import argparse
 import comet_ml
 import torch as th
 import torch.nn.functional as F
-from torch.utils.data import SubsetRandomSampler
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import CSVLogger, CometLogger
 
@@ -12,7 +11,7 @@ from datasets import load_impressionv2_dataset_all
 
 
 parser = argparse.ArgumentParser()
-# parser.add_argument("-f", default="", type=str)
+parser.add_argument("-f", default="", type=str)
 
 # Fixed
 parser.add_argument(
@@ -82,12 +81,12 @@ parser.add_argument(
 
 # Tuning
 parser.add_argument(
-    "--batch_size", type=int, default=2, metavar="N", help="batch size (default: 24)"
+    "--batch_size", type=int, default=8, metavar="N", help="batch size (default: 8)"
 )
 # parser.add_argument('--clip', type=float, default=0.8,
 #                     help='gradient clip value (default: 0.8)')
 parser.add_argument(
-    "--lr", type=float, default=1e-3, help="initial learning rate (default: 1e-3)"
+    "--lr", type=float, default=1e-2, help="initial learning rate"
 )
 # parser.add_argument('--optim', type=str, default='Adam',
 #                     help='optimizer to use (default: Adam)')
@@ -127,6 +126,7 @@ class MULTModelWarped(pl.LightningModule):
         super().__init__()
         self.model = MULTModel(hyp_params)
         self.save_hyperparameters(hyp_params)
+        self.learning_rate = hyp_params.lr
 
     def forward(self, *args):
         if len(args) == 3:
@@ -136,7 +136,7 @@ class MULTModelWarped(pl.LightningModule):
         return self.model(text, audio, face)[0]
 
     def configure_optimizers(self):
-        optimizer = th.optim.Adam(self.parameters(), lr=1e-3)
+        optimizer = th.optim.Adam(self.parameters(), lr=self.learning_rate)
         return optimizer
 
     def training_step(self, batch, batch_idx):
@@ -165,22 +165,13 @@ class MULTModelWarped(pl.LightningModule):
 
 train_ds, valid_ds, test_ds = load_impressionv2_dataset_all()
 train_dl = th.utils.data.DataLoader(
-    train_ds,
-    batch_size=hyp_params.batch_size,
-    pin_memory=True,
-    sampler=SubsetRandomSampler(range(8)),
+    train_ds, batch_size=hyp_params.batch_size, pin_memory=True,
 )
 valid_dl = th.utils.data.DataLoader(
-    valid_ds,
-    batch_size=hyp_params.batch_size,
-    pin_memory=True,
-    sampler=SubsetRandomSampler(range(4)),
+    valid_ds, batch_size=hyp_params.batch_size, pin_memory=True,
 )
 test_dl = th.utils.data.DataLoader(
-    test_ds,
-    batch_size=hyp_params.batch_size,
-    pin_memory=True,
-    sampler=SubsetRandomSampler(range(4)),
+    test_ds, batch_size=hyp_params.batch_size, pin_memory=True,
 )
 
 audio, face, text, label = next(iter(train_dl))
@@ -200,18 +191,21 @@ hyp_params.output_dim = label.shape[1]  # output_dim_dict.get(dataset, 1)
 # hyp_params.criterion = th.nn.L1Loss #criterion_dict.get(dataset, 'L1Loss')
 
 model = MULTModelWarped(hyp_params)
-csv_logger = CSVLogger("logs", name="my_exp_name")
-comet_logger = CometLogger(
-    api_key="cgss7piePhyFPXRw1J2uUEjkQ",
-    workspace="transformer",
-    project_name="test_logging",
-)
-trainer = pl.Trainer(
-    gpus=1,
-    max_epochs=hyp_params.num_epochs,
-    log_every_n_steps=1,
-    logger=[csv_logger, comet_logger],
-)
-trainer.fit(model, train_dl, valid_dl)
 
-trainer.test(test_dataloaders=test_dl)
+if __name__ == "__name__":
+    csv_logger = CSVLogger("logs", name="my_exp_name")
+    comet_logger = CometLogger(
+        api_key="cgss7piePhyFPXRw1J2uUEjkQ",
+        workspace="transformer",
+        project_name="find_lr",
+    )
+    trainer = pl.Trainer(
+        gpus=1,
+        max_epochs=hyp_params.num_epochs,
+        log_every_n_steps=1,
+        logger=[csv_logger, comet_logger],
+        fast_dev_run=4,
+    )
+    trainer.fit(model, train_dl, valid_dl)
+
+    trainer.test(test_dataloaders=test_dl)
