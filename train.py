@@ -91,7 +91,7 @@ parser.add_argument("--lr", type=float, default=1e-2, help="initial learning rat
 # parser.add_argument('--optim', type=str, default='Adam',
 #                     help='optimizer to use (default: Adam)')
 parser.add_argument(
-    "--num_epochs", type=int, default=40, help="number of epochs (default: 40)"
+    "--num_epochs", type=int, default=1000, help="number of epochs"
 )
 # parser.add_argument('--when', type=int, default=20,
 #                     help='when to decay learning rate (default: 20)')
@@ -147,7 +147,7 @@ class MULTModelWarped(pl.LightningModule):
         self.log_dict(
             metric_values, on_step=True, on_epoch=True, prog_bar=True, logger=True
         )
-        return metric_values
+        return metric_values["train_loss"]
 
     def validation_step(self, batch, batch_idx):
         metric_values = self._calc_loss_metrics(batch)
@@ -209,6 +209,7 @@ if __name__ == "__main__":
         max_epochs=hyp_params.num_epochs,
         log_every_n_steps=1,
         logger=[csv_logger, comet_logger],
+        overfit_batches=1
     )
     trainer.fit(model, train_dl, valid_dl)
 
