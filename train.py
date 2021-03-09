@@ -1,8 +1,9 @@
 import argparse
 
-from pytorch_lightning.loggers import CSVLogger, CometLogger
-import pytorch_lightning as pl
+import comet_ml
 import torch as th
+import pytorch_lightning as pl
+from pytorch_lightning.loggers import CSVLogger, CometLogger
 
 from lightningmodule import MULTModelWarped
 from datasets import load_impressionv2_dataset_all
