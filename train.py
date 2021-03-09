@@ -192,7 +192,7 @@ hyp_params.output_dim = label.shape[1]  # output_dim_dict.get(dataset, 1)
 
 model = MULTModelWarped(hyp_params)
 
-if __name__ == "__name__":
+if __name__ == "__main__":
     csv_logger = CSVLogger("logs", name="my_exp_name")
     comet_logger = CometLogger(
         api_key="cgss7piePhyFPXRw1J2uUEjkQ",
@@ -204,7 +204,6 @@ if __name__ == "__name__":
         max_epochs=hyp_params.num_epochs,
         log_every_n_steps=1,
         logger=[csv_logger, comet_logger],
-        fast_dev_run=4,
     )
     trainer.fit(model, train_dl, valid_dl)
 
