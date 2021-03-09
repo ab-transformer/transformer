@@ -5,7 +5,9 @@ import torch as th
 import torch.nn.functional as F
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import CSVLogger, CometLogger
+from pytorch_lightning.metrics.regression import MeanAbsoluteError
 
+import mutils
 from models import MULTModel
 from datasets import load_impressionv2_dataset_all
 
@@ -85,9 +87,7 @@ parser.add_argument(
 )
 # parser.add_argument('--clip', type=float, default=0.8,
 #                     help='gradient clip value (default: 0.8)')
-parser.add_argument(
-    "--lr", type=float, default=1e-2, help="initial learning rate"
-)
+parser.add_argument("--lr", type=float, default=1e-2, help="initial learning rate")
 # parser.add_argument('--optim', type=str, default='Adam',
 #                     help='optimizer to use (default: Adam)')
 parser.add_argument(
@@ -128,6 +128,8 @@ class MULTModelWarped(pl.LightningModule):
         self.save_hyperparameters(hyp_params)
         self.learning_rate = hyp_params.lr
 
+        self.mae_1 = 1 - MeanAbsoluteError()
+
     def forward(self, *args):
         if len(args) == 3:
             text, audio, face = args
@@ -140,27 +142,30 @@ class MULTModelWarped(pl.LightningModule):
         return optimizer
 
     def training_step(self, batch, batch_idx):
-        audio, face, text, y = batch
-        y_hat = self(text, audio, face)
-        loss = F.mse_loss(y_hat, y)
-        self.log(
-            "train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
+        metric_values = self._calc_loss_metrics(batch)
+        metric_values = {f"train_{k}": v for k, v in metric_values.items()}
+        self.log_dict(
+            metric_values, on_step=True, on_epoch=True, prog_bar=True, logger=True
         )
-        return loss
+        return metric_values
 
     def validation_step(self, batch, batch_idx):
-        audio, face, text, y = batch
-        y_hat = self(text, audio, face)
-        loss = F.mse_loss(y_hat, y)
-        self.log("valid_loss", loss)
-        return loss
+        metric_values = self._calc_loss_metrics(batch)
+        metric_values = {f"valid_{k}": v for k, v in metric_values.items()}
+        self.log_dict(metric_values)
+        return metric_values
 
     def test_step(self, batch, batch_idx):
+        metric_values = self._calc_loss_metrics(batch)
+        metric_values = {f"test_{k}": v for k, v in metric_values.items()}
+        self.log_dict(metric_values)
+        return metric_values
+
+    def _calc_loss_metrics(self, batch):
         audio, face, text, y = batch
         y_hat = self(text, audio, face)
         loss = F.mse_loss(y_hat, y)
-        self.log("test_loss", loss)
-        return loss
+        return {f"loss": loss, f"1_mae": self.mae_1(y_hat, y)}
 
 
 train_ds, valid_ds, test_ds = load_impressionv2_dataset_all()
