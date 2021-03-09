@@ -153,7 +153,7 @@ if __name__ == "__main__":
         comet_logger = CometLogger(
             api_key="cgss7piePhyFPXRw1J2uUEjkQ",
             workspace="transformer",
-            project_name="find_lr_0_01",
+            project_name="find_lr_0_1",
         )
         csv_logger = CSVLogger("logs", name=comet_logger.experiment.get_key())
         trainer = pl.Trainer(
@@ -162,8 +162,8 @@ if __name__ == "__main__":
             log_every_n_steps=1,
             callbacks=[EarlyStopping(monitor="valid_1mae", patience=10, verbose=True, mode='max')],
             logger=[csv_logger, comet_logger],
-            limit_train_batches=0.01,
-            limit_val_batches=0.01,
+            limit_train_batches=0.1,
+            limit_val_batches=0.1,
         )
         trainer.fit(model, train_dl, valid_dl)
         trainer.test(test_dataloaders=test_dl)
