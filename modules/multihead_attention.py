@@ -1,3 +1,5 @@
+# Source: https://github.com/yaohungt/Multimodal-Transformer
+
 import torch
 from torch import nn
 from torch.nn import Parameter
