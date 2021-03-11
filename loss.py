@@ -3,10 +3,10 @@ from torch.nn import functional as F
 
 
 def bell_loss(y_hat, y):
-    sigma = 9
-    gamma = 300
+    sigma = th.tensor(9)
+    gamma = th.tensor(300)
     error = th.square(y_hat - y)
-    scale = 2 * th.square(sigma)
+    scale = th.tensor(2) * th.square(sigma)
     return th.mean(gamma * (1 - th.exp(-(error / scale))))
 
 
