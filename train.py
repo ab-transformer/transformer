@@ -80,7 +80,7 @@ parser.add_argument(
 
 # Tuning
 parser.add_argument(
-    "--batch_size", type=int, default=8, metavar="N", help="batch size (default: 8)"
+    "--batch_size", type=int, default=4, metavar="N", help="batch size (default: 4)"
 )
 # parser.add_argument('--clip', type=float, default=0.8,
 #                     help='gradient clip value (default: 0.8)')
