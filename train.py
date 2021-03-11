@@ -97,6 +97,9 @@ parser.add_argument("--lr", type=float, default=1e-2, help="initial learning rat
 parser.add_argument(
     "--num_epochs", type=int, default=1000, help="number of epochs"
 )
+parser.add_argument(
+    "--limit", type=float, default=1.0, help="the procentage of data to be used"
+)
 # parser.add_argument('--when', type=int, default=20,
 #                     help='when to decay learning rate (default: 20)')
 # parser.add_argument('--batch_chunk', type=int, default=1,
@@ -170,8 +173,8 @@ if __name__ == "__main__":
             log_every_n_steps=1,
             callbacks=[EarlyStopping(monitor="valid_1mae", patience=10, verbose=True, mode='max')],
             logger=[csv_logger, comet_logger],
-            limit_train_batches=0.1,
-            limit_val_batches=0.1,
+            limit_train_batches=hyp_params.limit,
+            limit_val_batches=hyp_params.limit,
         )
         trainer.fit(model, train_dl, valid_dl)
         trainer.test(test_dataloaders=test_dl)

@@ -4,9 +4,9 @@ from pytorch_lightning.metrics import MeanAbsoluteError
 from torch.nn import functional as F
 
 from models import MULTModel
-from loss import bell_loss
+from loss import bell_loss, bell_mse_mae_loss
 
-loss_dict = {"L2": F.mse_loss, "Bell": bell_loss}
+loss_dict = {"L2": F.mse_loss, "Bell": bell_loss, "BellL1L2": bell_mse_mae_loss}
 
 
 class MULTModelWarped(pl.LightningModule):
