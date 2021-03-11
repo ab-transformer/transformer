@@ -119,11 +119,11 @@ parser.add_argument('--seed', type=int, default=-1,
 # )
 args = parser.parse_args()
 
-if args.SEED == -1:
-    args.SEED = random.randint(0, 10000)
-random.seed(args.SEED)
-np.random.seed(args.SEED)
-th.manual_seed(args.SEED)
+if args.seed == -1:
+    args.seed = random.randint(0, 10000)
+random.seed(args.seed)
+np.random.seed(args.seed)
+th.manual_seed(args.seed)
 th.backends.cudnn.deterministic = True
 th.backends.cudnn.benchmark = False
 
