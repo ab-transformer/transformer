@@ -1,6 +1,8 @@
+import random
 import argparse
 
 import comet_ml
+import numpy as np
 import torch as th
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping
@@ -108,14 +110,22 @@ parser.add_argument(
 # Logistics
 # parser.add_argument('--log_interval', type=int, default=30,
 #                     help='frequency of result logging (default: 30)')
-# parser.add_argument('--seed', type=int, default=1111,
-#                     help='random seed')
+parser.add_argument('--seed', type=int, default=-1,
+                    help='random seed')
 # parser.add_argument('--no_cuda', action='store_true',
 #                     help='do not use cuda')
-parser.add_argument(
-    "--name", type=str, default="mult", help='name of the trial (default: "mult")'
-)
+# parser.add_argument(
+#     "--name", type=str, default="mult", help='name of the trial (default: "mult")'
+# )
 args = parser.parse_args()
+
+if args.SEED == -1:
+    args.SEED = random.randint(0, 10000)
+random.seed(args.SEED)
+np.random.seed(args.SEED)
+th.manual_seed(args.SEED)
+th.backends.cudnn.deterministic = True
+th.backends.cudnn.benchmark = False
 
 valid_partial_mode = args.lonly + args.vonly + args.aonly
 
