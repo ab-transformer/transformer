@@ -23,7 +23,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--loss",
+    "--loss_fnc",
     type=str,
     default="L2",
     help="name of the loss function to use (default: Bell)",

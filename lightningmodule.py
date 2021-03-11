@@ -18,7 +18,7 @@ class MULTModelWarped(pl.LightningModule):
         self.target_names = target_names
 
         self.mae_1 = 1 - MeanAbsoluteError()
-        self.loss = loss_dict[hyp_params.loss]
+        self.loss = loss_dict[hyp_params.loss_fnc]
 
     def forward(self, *args):
         if len(args) == 3:
