@@ -173,7 +173,7 @@ if __name__ == "__main__":
         comet_logger = CometLogger(
             api_key="cgss7piePhyFPXRw1J2uUEjkQ",
             workspace="transformer",
-            project_name="find_lr_bell_0_1",
+            project_name="compare_loss",
             save_dir="logs/comet_ml"
         )
         csv_logger = CSVLogger("logs/csv", name=comet_logger.experiment.get_key())
