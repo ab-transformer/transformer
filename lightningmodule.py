@@ -4,6 +4,9 @@ from pytorch_lightning.metrics import MeanAbsoluteError
 from torch.nn import functional as F
 
 from models import MULTModel
+from loss import bell_loss
+
+loss_dict = {"L2": F.mse_loss, "Bell": bell_loss}
 
 
 class MULTModelWarped(pl.LightningModule):
@@ -15,6 +18,7 @@ class MULTModelWarped(pl.LightningModule):
         self.target_names = target_names
 
         self.mae_1 = 1 - MeanAbsoluteError()
+        self.loss = loss_dict[hyp_params.loss]
 
     def forward(self, *args):
         if len(args) == 3:
@@ -50,7 +54,7 @@ class MULTModelWarped(pl.LightningModule):
     def _calc_loss_metrics(self, batch):
         audio, face, text, y = batch
         y_hat = self(text, audio, face)
-        loss = F.mse_loss(y_hat, y)
+        loss = self.loss(y_hat, y)
         metric_values = self._calc_mae1_columnwise(y_hat, y)
         metric_values["loss"] = loss
         metric_values["1mae"] = self.mae_1(y_hat, y)

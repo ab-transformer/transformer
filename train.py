@@ -20,6 +20,13 @@ parser.add_argument(
     help="name of the model to use (Transformer, etc.)",
 )
 
+parser.add_argument(
+    "--loss",
+    type=str,
+    default="L2",
+    help="name of the loss function to use (default: Bell)",
+)
+
 # Tasks
 parser.add_argument(
     "--vonly",
@@ -153,7 +160,7 @@ if __name__ == "__main__":
         comet_logger = CometLogger(
             api_key="cgss7piePhyFPXRw1J2uUEjkQ",
             workspace="transformer",
-            project_name="find_lr_0_1",
+            project_name="find_lr_bell_0_1",
             save_dir="logs/comet_ml"
         )
         csv_logger = CSVLogger("logs/csv", name=comet_logger.experiment.get_key())
