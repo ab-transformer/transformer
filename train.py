@@ -154,8 +154,9 @@ if __name__ == "__main__":
             api_key="cgss7piePhyFPXRw1J2uUEjkQ",
             workspace="transformer",
             project_name="find_lr_0_1",
+            save_dir="logs/comet_ml"
         )
-        csv_logger = CSVLogger("logs", name=comet_logger.experiment.get_key())
+        csv_logger = CSVLogger("logs/csv", name=comet_logger.experiment.get_key())
         trainer = pl.Trainer(
             gpus=1,
             max_epochs=hyp_params.num_epochs,
