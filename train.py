@@ -164,7 +164,7 @@ hyp_params.output_dim = label.shape[1]  # output_dim_dict.get(dataset, 1)
 model = MULTModelWarped(hyp_params, target_names)
 
 if __name__ == "__main__":
-    for lr in [0.001, 0.0001, 0.00001]:  # 0.1, 0.01,
+    for lr in [0.0001, 0.00001]:  # 0.1, 0.01, 0.001, 
         hyp_params.lr = lr
         model = MULTModelWarped(hyp_params, target_names)
         comet_logger = CometLogger(
