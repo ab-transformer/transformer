@@ -96,9 +96,7 @@ parser.add_argument(
 parser.add_argument("--lr", type=float, default=1e-2, help="initial learning rate")
 # parser.add_argument('--optim', type=str, default='Adam',
 #                     help='optimizer to use (default: Adam)')
-parser.add_argument(
-    "--num_epochs", type=int, default=1000, help="number of epochs"
-)
+parser.add_argument("--num_epochs", type=int, default=1000, help="number of epochs")
 parser.add_argument(
     "--limit", type=float, default=1.0, help="the procentage of data to be used"
 )
@@ -110,8 +108,7 @@ parser.add_argument(
 # Logistics
 # parser.add_argument('--log_interval', type=int, default=30,
 #                     help='frequency of result logging (default: 30)')
-parser.add_argument('--seed', type=int, default=-1,
-                    help='random seed')
+parser.add_argument("--seed", type=int, default=-1, help="random seed")
 # parser.add_argument('--no_cuda', action='store_true',
 #                     help='do not use cuda')
 # parser.add_argument(
@@ -167,21 +164,25 @@ hyp_params.output_dim = label.shape[1]  # output_dim_dict.get(dataset, 1)
 model = MULTModelWarped(hyp_params, target_names)
 
 if __name__ == "__main__":
-    for lr in [0.1, 0.01, 0.001, 0.0001, 0.00001]:
+    for lr in [0.001, 0.0001, 0.00001]:  # 0.1, 0.01,
         hyp_params.lr = lr
         model = MULTModelWarped(hyp_params, target_names)
         comet_logger = CometLogger(
             api_key="cgss7piePhyFPXRw1J2uUEjkQ",
             workspace="transformer",
             project_name="compare_loss",
-            save_dir="logs/comet_ml"
+            save_dir="logs/comet_ml",
         )
         csv_logger = CSVLogger("logs/csv", name=comet_logger.experiment.get_key())
         trainer = pl.Trainer(
             gpus=1,
             max_epochs=hyp_params.num_epochs,
             log_every_n_steps=1,
-            callbacks=[EarlyStopping(monitor="valid_1mae", patience=10, verbose=True, mode='max')],
+            callbacks=[
+                EarlyStopping(
+                    monitor="valid_1mae", patience=10, verbose=True, mode="max"
+                )
+            ],
             logger=[csv_logger, comet_logger],
             limit_train_batches=hyp_params.limit,
             limit_val_batches=hyp_params.limit,
