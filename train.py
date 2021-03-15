@@ -140,13 +140,13 @@ train_dl = th.utils.data.DataLoader(
 )
 valid_dl = th.utils.data.DataLoader(
     valid_ds, batch_size=hyp_params.batch_size, pin_memory=True,
-hyp_params.orig_d_l = text.shape[2]
 )
 test_dl = th.utils.data.DataLoader(
     test_ds, batch_size=hyp_params.batch_size, pin_memory=True,
 )
 
 audio, face, text, label = next(iter(train_dl))
+hyp_params.orig_d_l = text.shape[2]
 hyp_params.orig_d_a = audio.shape[2]
 hyp_params.orig_d_v = face.shape[2]
 hyp_params.l_len = text.shape[1]
