@@ -164,7 +164,6 @@ hyp_params.output_dim = label.shape[1]  # output_dim_dict.get(dataset, 1)
 model = MULTModelWarped(hyp_params, target_names)
 
 if __name__ == "__main__":
-    model = MULTModelWarped(hyp_params, target_names)
     comet_logger = CometLogger(
         api_key="cgss7piePhyFPXRw1J2uUEjkQ",
         workspace="transformer",
@@ -172,20 +171,20 @@ if __name__ == "__main__":
         save_dir="logs/comet_ml",
     )
     csv_logger = CSVLogger("logs/csv", name=comet_logger.experiment.get_key())
+    early_stopping = EarlyStopping(
+        monitor="valid_1mae", patience=10, verbose=True, mode="max"
+    )
+    model = MULTModelWarped(hyp_params, target_names, early_stopping=early_stopping)
     trainer = pl.Trainer(
         gpus=1,
         max_epochs=hyp_params.num_epochs,
         log_every_n_steps=1,
-        callbacks=[
-            EarlyStopping(
-                monitor="valid_1mae", patience=10, verbose=True, mode="max"
-            )
-        ],
+        callbacks=[early_stopping],
         logger=[csv_logger, comet_logger],
         limit_train_batches=hyp_params.limit,
         limit_val_batches=hyp_params.limit,
-        weights_summary='full',
-        weights_save_path='logs/weights'
+        weights_summary="full",
+        weights_save_path="logs/weights",
     )
     trainer.fit(model, train_dl, valid_dl)
     trainer.test(test_dataloaders=test_dl)

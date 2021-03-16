@@ -1,4 +1,7 @@
 import time
+from pathlib import Path
+
+csv_dir = Path("logs/csv")
 
 
 class ElapsedTime:
@@ -33,3 +36,9 @@ class ElapsedTime:
                 )
             else:
                 print("%s was running for %f s" % (self.process_name, elapsed_time))
+
+
+def get_epoch_info(df):
+    df_train = df[~df["train_1mae_epoch"].isnull()][["epoch", "train_1mae_epoch"]]
+    df_valid = df[~df["valid_1mae"].isnull()][["epoch", "valid_1mae"]]
+    return df_train.merge(df_valid, on="epoch")

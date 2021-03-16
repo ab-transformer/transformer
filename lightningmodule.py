@@ -10,7 +10,7 @@ loss_dict = {"L2": F.mse_loss, "Bell": bell_loss, "BellL1L2": bell_mse_mae_loss}
 
 
 class MULTModelWarped(pl.LightningModule):
-    def __init__(self, hyp_params, target_names):
+    def __init__(self, hyp_params, target_names, early_stopping):
         super().__init__()
         self.model = MULTModel(hyp_params)
         self.save_hyperparameters(hyp_params)
@@ -19,6 +19,8 @@ class MULTModelWarped(pl.LightningModule):
 
         self.mae_1 = 1 - MeanAbsoluteError()
         self.loss = loss_dict[hyp_params.loss_fnc]
+
+        self.early_stopping = early_stopping
 
     def forward(self, *args):
         if len(args) == 3:
@@ -34,6 +36,8 @@ class MULTModelWarped(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         metric_values = self._calc_loss_metrics(batch)
         metric_values = {f"train_{k}": v for k, v in metric_values.items()}
+        metric_values["debug_early_stopping_wait_count"] = self.early_stopping.wait_count
+        metric_values["debug_early_stopping_best_score"] = self.early_stopping.best_score
         self.log_dict(
             metric_values, on_step=True, on_epoch=True, prog_bar=False, logger=True
         )
