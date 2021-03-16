@@ -36,8 +36,12 @@ class MULTModelWarped(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         metric_values = self._calc_loss_metrics(batch)
         metric_values = {f"train_{k}": v for k, v in metric_values.items()}
-        metric_values["debug_early_stopping_wait_count"] = self.early_stopping.wait_count
-        metric_values["debug_early_stopping_best_score"] = self.early_stopping.best_score
+        metric_values[
+            "debug_early_stopping_wait_count"
+        ] = self.early_stopping.wait_count
+        metric_values[
+            "debug_early_stopping_best_score"
+        ] = self.early_stopping.best_score
         self.log_dict(
             metric_values, on_step=True, on_epoch=True, prog_bar=False, logger=True
         )
@@ -48,6 +52,11 @@ class MULTModelWarped(pl.LightningModule):
         metric_values = {f"valid_{k}": v for k, v in metric_values.items()}
         self.log_dict(metric_values, prog_bar=False, logger=True)
         return metric_values
+
+    def validation_epoch_end(
+        self, validation_step_outputs
+    ):  # This method needs to be override in order for early stopping to work properly (pytorch lighning bug)
+        pass
 
     def test_step(self, batch, batch_idx):
         metric_values = self._calc_loss_metrics(batch)

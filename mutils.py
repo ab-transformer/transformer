@@ -41,4 +41,14 @@ class ElapsedTime:
 def get_epoch_info(df):
     df_train = df[~df["train_1mae_epoch"].isnull()][["epoch", "train_1mae_epoch"]]
     df_valid = df[~df["valid_1mae"].isnull()][["epoch", "valid_1mae"]]
-    return df_train.merge(df_valid, on="epoch")
+    df_res = df_train.merge(df_valid, on="epoch")
+    if "debug_early_stopping_best_score_epoch" in df.keys():
+        df_debug = df[~df["debug_early_stopping_wait_count_epoch"].isnull()][
+            [
+                "epoch",
+                "debug_early_stopping_wait_count_epoch",
+                "debug_early_stopping_best_score_epoch",
+            ]
+        ]
+        df_res = df_res.merge(df_debug, on="epoch")
+    return df_res
