@@ -161,7 +161,6 @@ hyp_params.v_len = face.shape[1]
 hyp_params.output_dim = label.shape[1]  # output_dim_dict.get(dataset, 1)
 # hyp_params.criterion = th.nn.L1Loss #criterion_dict.get(dataset, 'L1Loss')
 
-model = MULTModelWarped(hyp_params, target_names)
 
 if __name__ == "__main__":
     comet_logger = CometLogger(
