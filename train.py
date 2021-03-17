@@ -5,7 +5,7 @@ import comet_ml
 import numpy as np
 import torch as th
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import EarlyStopping
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import CSVLogger, CometLogger
 
 from lightningmodule import MULTModelWarped
@@ -86,6 +86,12 @@ parser.add_argument(
     action="store_false",
     help="use attention mask for Transformer (default: true)",
 )
+parser.add_argument(
+    "--project_dim",
+    type=int,
+    default=30,
+    help="dimension of the projected embedding (default: 30)",
+)
 
 # Tuning
 parser.add_argument(
@@ -100,6 +106,8 @@ parser.add_argument("--num_epochs", type=int, default=1000, help="number of epoc
 parser.add_argument(
     "--limit", type=float, default=1.0, help="the procentage of data to be used"
 )
+parser.add_argument('--shuffle', action='store_true',
+                    help='reshuffle the batches')
 # parser.add_argument('--when', type=int, default=20,
 #                     help='when to decay learning rate (default: 20)')
 # parser.add_argument('--batch_chunk', type=int, default=1,
@@ -111,9 +119,9 @@ parser.add_argument(
 parser.add_argument("--seed", type=int, default=-1, help="random seed")
 # parser.add_argument('--no_cuda', action='store_true',
 #                     help='do not use cuda')
-# parser.add_argument(
-#     "--name", type=str, default="mult", help='name of the trial (default: "mult")'
-# )
+parser.add_argument(
+    "--project_name", type=str, help='Project name'
+)
 args = parser.parse_args()
 
 if args.seed == -1:
@@ -136,7 +144,7 @@ hyp_params = args
 
 [train_ds, valid_ds, test_ds], target_names = load_impressionv2_dataset_all()
 train_dl = th.utils.data.DataLoader(
-    train_ds, batch_size=hyp_params.batch_size, pin_memory=True,
+    train_ds, batch_size=hyp_params.batch_size, pin_memory=True, shuffle=hyp_params.shuffle
 )
 valid_dl = th.utils.data.DataLoader(
     valid_ds, batch_size=hyp_params.batch_size, pin_memory=True,
@@ -166,19 +174,20 @@ if __name__ == "__main__":
     comet_logger = CometLogger(
         api_key="cgss7piePhyFPXRw1J2uUEjkQ",
         workspace="transformer",
-        project_name="compare_loss",
+        project_name=hyp_params.project_name,
         save_dir="logs/comet_ml",
     )
     csv_logger = CSVLogger("logs/csv", name=comet_logger.experiment.get_key())
     early_stopping = EarlyStopping(
         monitor="valid_1mae", patience=10, verbose=True, mode="max"
     )
+    checkpoint = ModelCheckpoint(save_top_k=1, monitor="valid_1mae", mode="max")
     model = MULTModelWarped(hyp_params, target_names, early_stopping=early_stopping)
     trainer = pl.Trainer(
         gpus=1,
         max_epochs=hyp_params.num_epochs,
         log_every_n_steps=1,
-        callbacks=[early_stopping],
+        callbacks=[early_stopping, checkpoint],
         logger=[csv_logger, comet_logger],
         limit_train_batches=hyp_params.limit,
         limit_val_batches=hyp_params.limit,

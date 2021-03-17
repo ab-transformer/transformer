@@ -14,7 +14,7 @@ class MULTModel(nn.Module):
         """
         super(MULTModel, self).__init__()
         self.orig_d_l, self.orig_d_a, self.orig_d_v = hyp_params.orig_d_l, hyp_params.orig_d_a, hyp_params.orig_d_v  # input embedding size
-        self.d_l, self.d_a, self.d_v = 30, 30, 30  # projected embedding size
+        self.d_l, self.d_a, self.d_v = hyp_params.project_dim, hyp_params.project_dim, hyp_params.project_dim  # projected embedding size
         self.vonly = hyp_params.vonly  # only visual subnetwork
         self.aonly = hyp_params.aonly  # only audio subnetwork
         self.lonly = hyp_params.lonly  # only text subnetwork
