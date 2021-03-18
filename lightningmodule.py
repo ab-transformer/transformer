@@ -96,17 +96,18 @@ class MULTModelWarpedAll(MULTModelWarped):
     def train_dataloader(self):
         return th.utils.data.DataLoader(
             self.train_ds,
+            num_workers=1,
             batch_size=self.batch_size,
-            # pin_memory=True,
+            pin_memory=True,
             shuffle=self.shuffle,
         )
 
     def val_dataloader(self):
         return th.utils.data.DataLoader(
-            self.valid_ds, batch_size=self.batch_size, #pin_memory=True,
+            self.valid_ds, num_workers=1, batch_size=self.batch_size, pin_memory=True,
         )
 
     def test_dataloader(self):
         return th.utils.data.DataLoader(
-            self.test_ds, batch_size=self.batch_size, #pin_memory=True,
+            self.test_ds, num_workers=1, batch_size=self.batch_size, pin_memory=True,
         )

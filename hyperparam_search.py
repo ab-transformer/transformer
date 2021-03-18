@@ -42,7 +42,7 @@ def train_mult(config):
     tune_reporter = TuneReportCallback(["valid_loss", "valid_1mae"])
     model = MULTModelWarpedAll(hyp_params, early_stopping=early_stopping)
     trainer = pl.Trainer(
-        # gpus=1,
+        gpus=1,
         max_epochs=hyp_params.num_epochs,
         log_every_n_steps=1,
         callbacks=[early_stopping, checkpoint, tune_reporter],
@@ -51,7 +51,7 @@ def train_mult(config):
         limit_val_batches=hyp_params.limit,
         weights_summary="full",
         weights_save_path="logs/weights",
-        progress_bar_refresh_rate=0,
+        # progress_bar_refresh_rate=0,
     )
     trainer.fit(model)
 
@@ -88,11 +88,11 @@ reporter = CLIReporter(
 #     sync_to_driver=DockerSyncer)
 analysis = tune.run(
     train_mult,
-    resources_per_trial={"cpu": 1, "gpu": 0},
+    resources_per_trial={"cpu": 4, "gpu": 1},
     # metric="valid_1mae",
     # mode="max",
     config=config,
-    num_samples=1,
+    num_samples=10,
     scheduler=scheduler,
     progress_reporter=reporter,
     name="tune_lonly_asha",
