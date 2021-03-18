@@ -92,6 +92,6 @@ analysis = tune.run(
     num_samples=10,
     scheduler=scheduler,
     progress_reporter=reporter,
-    name="tune_multt_asha",
+    name="tune_lonly_asha",
 )
-# --lonly --num_epochs 30 --project_name lonly_asha
+# python hyperparam_search.py --lonly --num_epochs 30 --project_name lonly_asha
