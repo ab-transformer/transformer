@@ -93,4 +93,4 @@ analysis = tune.run(
     progress_reporter=reporter,
     name="tune_lonly_asha_150",
 )
-# python hyperparam_search.py --lonly --num_epochs 40 --project_name lonly_asha_150
+# python hyperparam_search.py --lonly --num_epochs 40 --batch_size 128 --project_name lonly_asha_150
