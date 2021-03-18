@@ -177,7 +177,8 @@ if __name__ == "__main__":
         project_name=hyp_params.project_name,
         save_dir="logs/comet_ml",
     )
-    csv_logger = CSVLogger("logs/csv", name=comet_logger.experiment.get_key())
+    experiement_key = comet_logger.experiment.get_key()
+    csv_logger = CSVLogger("logs/csv", name=experiement_key)
     early_stopping = EarlyStopping(
         monitor="valid_1mae", patience=10, verbose=True, mode="max"
     )
@@ -195,4 +196,9 @@ if __name__ == "__main__":
         weights_save_path="logs/weights",
     )
     trainer.fit(model, train_dl, valid_dl)
+
+    # ck = th.load(checkpoint.best_model_path)
+    # model.load_state_dict(ck['state_dict'])
+    # model
+
     trainer.test(test_dataloaders=test_dl)
