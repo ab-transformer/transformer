@@ -9,7 +9,7 @@ from ray.tune import CLIReporter
 from ray.tune.schedulers import ASHAScheduler
 from ray.tune.integration.pytorch_lightning import TuneReportCallback
 
-from train import hyp_params  # , train_ds, valid_ds, test_ds
+from train import hyp_params
 from lightningmodule import MULTModelWarpedAll
 
 
@@ -51,7 +51,7 @@ def train_mult(config):
         limit_val_batches=hyp_params.limit,
         weights_summary="full",
         weights_save_path="logs/weights",
-        # progress_bar_refresh_rate=0,
+        progress_bar_refresh_rate=0,
     )
     trainer.fit(model)
 
@@ -83,19 +83,13 @@ scheduler = ASHAScheduler(
 reporter = CLIReporter(
     metric_columns=["valid_1mae", "valid_loss", "training_iteration"]
 )
-# from ray.tune.integration.docker import DockerSyncer
-# sync_config = tune.SyncConfig(
-#     sync_to_driver=DockerSyncer)
 analysis = tune.run(
     train_mult,
     resources_per_trial={"cpu": 4, "gpu": 1},
-    # metric="valid_1mae",
-    # mode="max",
     config=config,
     num_samples=10,
     scheduler=scheduler,
     progress_reporter=reporter,
     name="tune_lonly_asha",
-    # sync_config=sync_config
 )
 # python hyperparam_search.py --lonly --num_epochs 30 --project_name lonly_asha
