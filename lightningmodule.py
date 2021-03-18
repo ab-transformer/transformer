@@ -16,6 +16,7 @@ class MULTModelWarped(pl.LightningModule):
         self.model = MULTModel(hyp_params)
         self.save_hyperparameters(hyp_params)
         self.learning_rate = hyp_params.lr
+        self.weight_decay = hyp_params.weight_decay
         self.target_names = target_names
 
         self.mae_1 = 1 - MeanAbsoluteError()
@@ -31,7 +32,7 @@ class MULTModelWarped(pl.LightningModule):
         return self.model(text, audio, face)[0]
 
     def configure_optimizers(self):
-        optimizer = th.optim.Adam(self.parameters(), lr=self.learning_rate)
+        optimizer = th.optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
         return optimizer
 
     def training_step(self, batch, batch_idx):

@@ -94,7 +94,9 @@ parser.add_argument(
 )
 # parser.add_argument('--clip', type=float, default=0.8,
 #                     help='gradient clip value (default: 0.8)')
+
 parser.add_argument("--lr", type=float, default=1e-2, help="initial learning rate")
+parser.add_argument("--weight_decay", type=float, default=0.0, help="weight_decay")
 # parser.add_argument('--optim', type=str, default='Adam',
 #                     help='optimizer to use (default: Adam)')
 parser.add_argument("--num_epochs", type=int, default=1000, help="number of epochs")

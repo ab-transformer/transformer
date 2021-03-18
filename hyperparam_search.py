@@ -74,6 +74,7 @@ config = {
     "head_dim": tune.randint(8, 15),
     # "project_dim": tune.choice([40, 50, 60, 70]),
     "lr": tune.loguniform(1e-5, 1e-3),
+    "weight_decay": tune.loguniform(1e-5, 1e-2),
 }
 
 scheduler = ASHAScheduler(
@@ -81,15 +82,15 @@ scheduler = ASHAScheduler(
 )
 
 reporter = CLIReporter(
-    metric_columns=["valid_1mae", "valid_loss", "training_iteration"]
+    metric_columns=["valid_1mae", "training_iteration"]
 )
 analysis = tune.run(
     train_mult,
     resources_per_trial={"cpu": 4, "gpu": 1},
     config=config,
-    num_samples=10,
+    num_samples=150,
     scheduler=scheduler,
     progress_reporter=reporter,
-    name="tune_lonly_asha",
+    name="tune_lonly_asha_150",
 )
-# python hyperparam_search.py --lonly --num_epochs 30 --project_name lonly_asha
+# python hyperparam_search.py --lonly --num_epochs 40 --project_name lonly_asha_150
