@@ -5,6 +5,7 @@ from torch.nn import functional as F
 
 from models import MULTModel
 from loss import bell_loss, bell_mse_mae_loss
+from datasets import load_impressionv2_dataset_all
 
 loss_dict = {"L2": F.mse_loss, "Bell": bell_loss, "BellL1L2": bell_mse_mae_loss}
 
@@ -78,3 +79,34 @@ class MULTModelWarped(pl.LightningModule):
             f"1mae_{name}": self.mae_1(y_hat[:, i], y[:, i])
             for i, name in enumerate(self.target_names)
         }
+
+
+class MULTModelWarpedAll(MULTModelWarped):
+    def __init__(self, hyp_params, early_stopping):
+        super().__init__(hyp_params, None, early_stopping)
+        self.batch_size = hyp_params.batch_size
+        self.shuffle = hyp_params.shuffle
+
+    def prepare_data(self):
+        (
+            [self.train_ds, self.valid_ds, self.test_ds],
+            self.target_names,
+        ) = load_impressionv2_dataset_all()
+
+    def train_dataloader(self):
+        return th.utils.data.DataLoader(
+            self.train_ds,
+            batch_size=self.batch_size,
+            # pin_memory=True,
+            shuffle=self.shuffle,
+        )
+
+    def val_dataloader(self):
+        return th.utils.data.DataLoader(
+            self.valid_ds, batch_size=self.batch_size, #pin_memory=True,
+        )
+
+    def test_dataloader(self):
+        return th.utils.data.DataLoader(
+            self.test_ds, batch_size=self.batch_size, #pin_memory=True,
+        )
