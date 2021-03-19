@@ -78,7 +78,7 @@ config = {
 }
 
 scheduler = ASHAScheduler(
-    metric="valid_1mae", mode="max", max_t=hyp_params.num_epochs, grace_period=3
+    metric="valid_1mae", mode="max", max_t=hyp_params.num_epochs, grace_period=5
 )
 
 reporter = CLIReporter(
@@ -88,9 +88,9 @@ analysis = tune.run(
     train_mult,
     resources_per_trial={"cpu": 4, "gpu": 1},
     config=config,
-    num_samples=150,
+    num_samples=500,
     scheduler=scheduler,
     progress_reporter=reporter,
-    name="tune_lonly_asha_150",
+    name="tune_lonly_asha_500",
 )
-# python hyperparam_search.py --lonly --num_epochs 40 --batch_size 128 --project_name lonly_asha_150
+# python hyperparam_search.py --lonly --num_epochs 40 --batch_size 128 --project_name lonly_asha_500
