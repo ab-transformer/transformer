@@ -1,6 +1,8 @@
 import time
 from pathlib import Path
 
+import pandas as pd
+
 csv_dir = Path("logs/csv")
 
 
@@ -36,6 +38,12 @@ class ElapsedTime:
                 )
             else:
                 print("%s was running for %f s" % (self.process_name, elapsed_time))
+
+
+def get_exp_csv(exp_id):
+    return pd.read_csv(
+        csv_dir / exp_id / "version_0" / "metrics.csv"
+    )
 
 
 def get_epoch_info(df):
