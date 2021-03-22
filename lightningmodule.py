@@ -1,5 +1,6 @@
 import pytorch_lightning as pl
 import torch as th
+from torch import optim
 from pytorch_lightning.metrics import MeanAbsoluteError
 from torch.nn import functional as F
 
@@ -8,6 +9,7 @@ from loss import bell_loss, bell_mse_mae_loss
 from datasets import load_impressionv2_dataset_all
 
 loss_dict = {"L2": F.mse_loss, "Bell": bell_loss, "BellL1L2": bell_mse_mae_loss}
+opt_dict = {"Adam": optim.Adam, "SGD": optim.SGD}
 
 
 class MULTModelWarped(pl.LightningModule):
@@ -21,6 +23,7 @@ class MULTModelWarped(pl.LightningModule):
 
         self.mae_1 = 1 - MeanAbsoluteError()
         self.loss = loss_dict[hyp_params.loss_fnc]
+        self.opt = opt_dict[hyp_params.optim]
 
         self.early_stopping = early_stopping
 
@@ -32,7 +35,7 @@ class MULTModelWarped(pl.LightningModule):
         return self.model(text, audio, face)[0]
 
     def configure_optimizers(self):
-        optimizer = th.optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        optimizer = self.opt(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
         return optimizer
 
     def training_step(self, batch, batch_idx):

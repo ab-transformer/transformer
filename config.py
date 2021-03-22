@@ -97,14 +97,14 @@ parser.add_argument(
 
 parser.add_argument("--lr", type=float, default=1e-2, help="initial learning rate")
 parser.add_argument("--weight_decay", type=float, default=0.0, help="weight_decay")
-# parser.add_argument('--optim', type=str, default='Adam',
-#                     help='optimizer to use (default: Adam)')
+parser.add_argument(
+    "--optim", type=str, default="Adam", help="optimizer to use (default: Adam)"
+)
 parser.add_argument("--num_epochs", type=int, default=1000, help="number of epochs")
 parser.add_argument(
     "--limit", type=float, default=1.0, help="the procentage of data to be used"
 )
-parser.add_argument('--shuffle', action='store_true',
-                    help='reshuffle the batches')
+parser.add_argument("--shuffle", action="store_true", help="reshuffle the batches")
 # parser.add_argument('--when', type=int, default=20,
 #                     help='when to decay learning rate (default: 20)')
 # parser.add_argument('--batch_chunk', type=int, default=1,
@@ -116,9 +116,7 @@ parser.add_argument('--shuffle', action='store_true',
 parser.add_argument("--seed", type=int, default=-1, help="random seed")
 # parser.add_argument('--no_cuda', action='store_true',
 #                     help='do not use cuda')
-parser.add_argument(
-    "--project_name", type=str, help='Project name'
-)
+parser.add_argument("--project_name", type=str, help="Project name")
 args = parser.parse_args()
 
 if args.seed == -1:
