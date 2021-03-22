@@ -23,9 +23,9 @@ def train_mult(config, checkpoint_dir=None):
     hyp_params.relu_dropout = config["relu_dropout"]
     hyp_params.res_dropout = config["res_dropout"]
 
-    hyp_params.layers = int(config["layers"])
-    hyp_params.num_heads = int(config["num_heads"])
-    hyp_params.project_dim = int(config["num_heads"]) * int(config["head_dim"])
+    # hyp_params.layers = int(config["layers"])
+    # hyp_params.num_heads = int(config["num_heads"])
+    # hyp_params.project_dim = int(config["num_heads"]) * int(config["head_dim"])
     hyp_params.lr = 10 ** config["lr_log"]
     hyp_params.weight_decay = 10 ** config["weight_decay_log"]
 
@@ -110,11 +110,11 @@ analysis = tune.run(
     train_mult,
     metric="valid_1mae",
     mode="max",
-    resources_per_trial={"cpu": 4, "gpu": 1},
+    resources_per_trial={"cpu": 16, "gpu": 1},
     config=config,
     num_samples=500,
     scheduler=scheduler,
     progress_reporter=reporter,
     name="tune_pbt",
 )
-# python hyperparam_search_pbt.py --lonly --num_epochs 100 --project_dim 50 --batch_size 128 --optim SGD --project_name pbt
+# python hyperparam_search_pbt.py --num_epochs 100 --project_dim 50 --batch_size 4 --optim SGD --project_name pbt
