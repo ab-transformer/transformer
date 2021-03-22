@@ -26,8 +26,8 @@ def train_mult(config, checkpoint_dir=None):
     # hyp_params.layers = int(config["layers"])
     # hyp_params.num_heads = int(config["num_heads"])
     # hyp_params.project_dim = int(config["num_heads"]) * int(config["head_dim"])
-    hyp_params.lr = 10 ** config["lr_log"]
-    hyp_params.weight_decay = 10 ** config["weight_decay_log"]
+    hyp_params.lr = config["lr"]
+    hyp_params.weight_decay = config["weight_decay"]
 
     comet_logger = CometLogger(
         api_key="cgss7piePhyFPXRw1J2uUEjkQ",
