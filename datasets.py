@@ -90,7 +90,7 @@ def load_impressionv2_dataset_all(
     valid_ds, test_target_names = load_impressionv2_dataset_split("valid")
     test_ds, valid_target_names = load_impressionv2_dataset_split("test")
 
-    if (srA is not None) and (srF is not None) and (srT is not None):
+    if (srA is not None) or (srF is not None) or (srT is not None):
         train_ds = TensorDatasetWithTransformer(
             train_ds, SamplerTransform(srA, srF, srT, is_random)
         )
