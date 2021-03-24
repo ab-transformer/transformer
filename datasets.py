@@ -18,7 +18,68 @@ IMPRESSIONV2_DIR = Path("/impressionv2")
 EMBEDDING_DIR = Path("/mbalazsdb")
 
 
-def load_impressionv2_dataset_all() -> Tuple[List[th.utils.data.Dataset], List[str]]:
+class TensorDatasetWithTransformer(th.utils.data.Dataset):
+    def __init__(self, tensor_dataset, transform=None):
+        self.tensor_dataset = tensor_dataset
+        self.transform = transform
+
+    def __getitem__(self, index):
+        sample = self.tensor_dataset[index]
+        if self.transform:
+            sample = self.transform(sample)
+
+        return sample
+
+    def __len__(self):
+        return len(self.tensor_dataset)
+
+
+class SamplerTransform:
+    def __init__(self, srA, srF, srT, is_random=False):
+        self.srA = srA
+        self.srF = srF
+        self.srT = srT
+        self.is_random = is_random
+
+    def __call__(self, x):
+        audio, face, text, label = x
+        al = audio.shape[0]
+        fl = face.shape[0]
+        tl = text.shape[0]
+        assert al == 1526
+        assert fl == 459
+        assert tl == 60
+        assert self.srA <= al
+        assert self.srF <= fl
+        assert self.srT <= tl
+
+        if not self.is_random:
+            a_idx = np.linspace(0, al - 1, self.srA, dtype=int)
+            f_idx = np.linspace(0, fl - 1, self.srF, dtype=int)
+            t_idx = np.linspace(0, tl - 1, self.srT, dtype=int)
+        else:
+            a_idx = np.random.choice(al - 1, self.srA, replace=False)
+            f_idx = np.random.choice(fl - 1, self.srF, replace=False)
+            t_idx = np.random.choice(tl - 1, self.srT, replace=False)
+            a_idx.sort()
+            f_idx.sort()
+            t_idx.sort()
+        audio_s = [
+            a_idx,
+        ]
+        face_s = [
+            f_idx,
+        ]
+        text_s = [
+            t_idx,
+        ]
+
+        return audio_s, face_s, text_s, label
+
+
+def load_impressionv2_dataset_all(
+    srA=None, srF=None, srT=None, is_random=False
+) -> Tuple[List[th.utils.data.Dataset], List[str]]:
     """Loads 3 datasets containing embeddings for ImpressionV2 for a specific split. The dataset returns tensors of
     embeddings in the following order: audio, face, text, label. The label is not an embedding but the ground truth
     value. All three datasets will take up 13.3 GB space in the RAM.
@@ -28,12 +89,24 @@ def load_impressionv2_dataset_all() -> Tuple[List[th.utils.data.Dataset], List[s
     train_ds, train_target_names = load_impressionv2_dataset_split("train")
     valid_ds, test_target_names = load_impressionv2_dataset_split("valid")
     test_ds, valid_target_names = load_impressionv2_dataset_split("test")
+
+    if (srA is not None) and (srF is not None) and (srT is not None):
+        train_ds = TensorDatasetWithTransformer(
+            train_ds, SamplerTransform(srA, srF, srT, is_random)
+        )
+        valid_ds = TensorDatasetWithTransformer(
+            valid_ds, SamplerTransform(srA, srF, srT, False)
+        )
+        test_ds = TensorDatasetWithTransformer(test_ds, SamplerTransform(srA, srF, srT, False))
+
     assert train_target_names == valid_target_names
     assert train_target_names == test_target_names
     return [train_ds, valid_ds, test_ds], train_target_names
 
 
-def load_impressionv2_dataset_split(split: str) -> Tuple[th.utils.data.Dataset, List[str]]:
+def load_impressionv2_dataset_split(
+    split: str,
+) -> Tuple[th.utils.data.Dataset, List[str]]:
     """Loads a dataset containing embeddings for ImpressionV2 for a specific split. The dataset returns tensors of
     embeddings in the following order: audio, face, text, label. The label is not an embedding but the ground truth
     value.
@@ -55,7 +128,10 @@ def load_impressionv2_dataset_split(split: str) -> Tuple[th.utils.data.Dataset, 
     face_th = th.tensor(face_np)
     text_th = th.tensor(text_np)
     label_th = th.tensor([gt[video] for video in videos])
-    return th.utils.data.TensorDataset(audio_th, face_th, text_th, label_th), target_names
+    return (
+        th.utils.data.TensorDataset(audio_th, face_th, text_th, label_th),
+        target_names,
+    )
 
 
 def _get_gt(split: str) -> Tuple[Dict, List[str]]:

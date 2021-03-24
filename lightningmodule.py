@@ -35,7 +35,9 @@ class MULTModelWarped(pl.LightningModule):
         return self.model(text, audio, face)[0]
 
     def configure_optimizers(self):
-        optimizer = self.opt(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        optimizer = self.opt(
+            self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay
+        )
         return optimizer
 
     def training_step(self, batch, batch_idx):
@@ -91,11 +93,16 @@ class MULTModelWarpedAll(MULTModelWarped):
         self.batch_size = hyp_params.batch_size
         self.shuffle = hyp_params.shuffle
 
+        self.srA = hyp_params.a_sample
+        self.srF = hyp_params.v_sample
+        self.srT = hyp_params.l_sample
+        self.is_random = hyp_params.random_sample
+
     def prepare_data(self):
         (
             [self.train_ds, self.valid_ds, self.test_ds],
             self.target_names,
-        ) = load_impressionv2_dataset_all()
+        ) = load_impressionv2_dataset_all(self.srA, self.srF, self.srT, self.is_random)
 
     def train_dataloader(self):
         return th.utils.data.DataLoader(

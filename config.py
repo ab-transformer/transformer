@@ -40,6 +40,11 @@ parser.add_argument(
     action="store_true",
     help="use the crossmodal fusion into l (default: False)",
 )
+parser.add_argument("--v_sample", type=int, default=None, help="vision modality samples, if none all time steps are used")
+parser.add_argument("--a_sample", type=int, default=None, help="audio modality samples, if none all time steps are used")
+parser.add_argument("--l_sample", type=int, default=None, help="language modality samples, if none all time steps are used")
+parser.add_argument("--random_sample", action="store_true", help="take random time stamps instead of equally spaced ones")
+
 # parser.add_argument('--aligned', action='store_true',
 #                     help='consider aligned experiment or not (default: False)')
 # parser.add_argument('--dataset', type=str, default='mosei_senti',
