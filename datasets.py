@@ -70,15 +70,9 @@ class SamplerTransform:
             a_idx.sort()
             f_idx.sort()
             t_idx.sort()
-        audio_s = [
-            a_idx,
-        ]
-        face_s = [
-            f_idx,
-        ]
-        text_s = [
-            t_idx,
-        ]
+        audio_s = audio[a_idx, ]
+        face_s = face[f_idx, ]
+        text_s = text[t_idx, ]
 
         return audio_s, face_s, text_s, label
 
