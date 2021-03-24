@@ -49,6 +49,12 @@ class SamplerTransform:
         assert al == 1526
         assert fl == 459
         assert tl == 60
+        if self.srA is None:
+            self.srA = al
+        if self.srF is None:
+            self.srF = fl
+        if self.srT is None:
+            self.srT = tl
         assert self.srA <= al
         assert self.srF <= fl
         assert self.srT <= tl
@@ -97,7 +103,9 @@ def load_impressionv2_dataset_all(
         valid_ds = TensorDatasetWithTransformer(
             valid_ds, SamplerTransform(srA, srF, srT, False)
         )
-        test_ds = TensorDatasetWithTransformer(test_ds, SamplerTransform(srA, srF, srT, False))
+        test_ds = TensorDatasetWithTransformer(
+            test_ds, SamplerTransform(srA, srF, srT, False)
+        )
 
     assert train_target_names == valid_target_names
     assert train_target_names == test_target_names
