@@ -72,7 +72,7 @@ class SamplerTransform:
             t_idx.sort()
         audio_s = audio[a_idx, ]
         face_s = face[f_idx, ]
-        text_s = text[t_idx, ]
+        text_s = text[t_idx, ] # 60x768 -> 10x768
 
         return audio_s, face_s, text_s, label
 
