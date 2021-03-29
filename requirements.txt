@@ -16,3 +16,6 @@ pytorch-lightning==1.2.2
 comet-ml==3.4.0
 ray[tune]==1.2.0
 bayesian-optimization==1.2.0
+
+#ig65m
+einops==0.1.0
