@@ -97,12 +97,15 @@ class MULTModelWarpedAll(MULTModelWarped):
         self.srF = hyp_params.v_sample
         self.srT = hyp_params.l_sample
         self.is_random = hyp_params.random_sample
+        self.audio_emb = hyp_params.audio_emb
+        self.face_emb = hyp_params.face_emb
+        self.text_emb = hyp_params.text_emb
 
     def prepare_data(self):
         (
             [self.train_ds, self.valid_ds, self.test_ds],
             self.target_names,
-        ) = load_impressionv2_dataset_all(self.srA, self.srF, self.srT, self.is_random)
+        ) = load_impressionv2_dataset_all(self.srA, self.srF, self.srT, self.is_random, self.audio_emb, self.face_emb, self.text_emb)
 
     def train_dataloader(self):
         return th.utils.data.DataLoader(

@@ -134,17 +134,15 @@ def load_impressionv2_dataset_split(
     :param split: Can be either "train", "valid" or "test".
     :return:
     """
-    split_dir = IMPRESSIONV2_DIR / split
     gt, target_names = _get_gt(split)
     videos = sorted(gt.keys())
-    video_dirs = [split_dir / video for video in videos]
     assert len(videos) == SET_SIZE[split]
 
     audio_embs = {"lld": _get_lld_audio}
-    face_embs = {"resnet18": _get_resnet18_face}
+    face_embs = {"resnet18": _get_resnet18_face, "ig65m": _get_ig65m_face}
     text_embs = {"bert": _get_bert_text}
-    audio_norm = audio_embs[audio_emb](split, video_dirs)
-    face_np = face_embs[face_emb](split, video_dirs)
+    audio_norm = audio_embs[audio_emb](split, videos)
+    face_np = face_embs[face_emb](split, videos)
     text_np = text_embs[text_emb](split, videos)
 
     audio_th = th.tensor(audio_norm)
@@ -174,8 +172,14 @@ def _get_gt(split: str) -> Tuple[Dict, List[str]]:
     return gt, target_names
 
 
+def videos2videodirs(split, videos):
+    split_dir = IMPRESSIONV2_DIR / split
+    return [split_dir / video for video in videos]
+
+
 # region lld audio
-def _get_lld_audio(split: str, video_dirs: List[Path]) -> np.ndarray:
+def _get_lld_audio(split: str, videos: List[str]) -> np.ndarray:
+    video_dirs = videos2videodirs(split, videos)
     file = IMPRESSIONV2_DIR / f"{split}_audio.pkl"
     if not file.exists():
         audio_np = _create_lld_audio(video_dirs)
@@ -239,7 +243,8 @@ def _create_bert_text(split: str, videos: List[str]) -> np.ndarray:
 # endregion
 
 # region resnet18 face
-def _get_resnet18_face(split: str, video_dirs: List[Path]) -> np.ndarray:
+def _get_resnet18_face(split: str, videos: List[str]) -> np.ndarray:
+    video_dirs = videos2videodirs(split, videos)
     file = IMPRESSIONV2_DIR / f"{split}_face.npy"
     if not file.exists():
         face_np = _creat_resnet18_face(video_dirs)
@@ -256,6 +261,27 @@ def _creat_resnet18_face(video_dirs: List[Path]) -> np.ndarray:
     face_list_pad = [np.pad(a, [(0, 459 - a.shape[0]), (0, 0)]) for a in face_list]
     face_np = np.stack(face_list_pad)
     return face_np
+
+
+# endregion
+
+# region ig65m face
+def _get_ig65m_face(split: str, videos: List[str]) -> np.ndarray:
+    file = IMPRESSIONV2_DIR / f"{split}_ig65m_face.npy"
+    if not file.exists():
+        faces_dir = Path("/impressionv2_faces/openface/")
+        video_paths = [faces_dir / f"{video}_ig65m.npy" for video in videos]
+        face_np = _creat_resnet18_face(video_paths)
+        np.save(file, face_np)
+    else:
+        face_np = np.load(file)
+    return face_np
+
+
+def _create_ig65m_face(video_paths: List[Path]) -> np.ndarray:
+    video_list = [np.load(video) for video in video_paths]
+    video_list_pad = [np.pad(a, [(0, 14 - a.shape[0]), (0, 0)]) for a in video_list]
+    return np.stack(video_list_pad)
 
 
 # endregion
