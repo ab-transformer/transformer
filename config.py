@@ -178,7 +178,7 @@ hyp_params = args
 [train_ds, valid_ds, test_ds], target_names = load_impressionv2_dataset_all(
     args.a_sample,
     args.v_sample,
-    args.t_sample,
+    args.l_sample,
     args.random_sample,
     args.audio_emb,
     args.face_emb,
