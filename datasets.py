@@ -271,7 +271,7 @@ def _get_ig65m_face(split: str, videos: List[str]) -> np.ndarray:
     if not file.exists():
         faces_dir = Path("/impressionv2_faces/openface/")
         video_paths = [faces_dir / f"{video}_ig65m.npy" for video in videos]
-        face_np = _creat_resnet18_face(video_paths)
+        face_np = _create_ig65m_face(video_paths)
         np.save(file, face_np)
     else:
         face_np = np.load(file)
