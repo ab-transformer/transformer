@@ -1,16 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
-import os
-os.chdir('..')
-
-
-# In[2]:
-
-
 import sys
 from pathlib import Path
 
@@ -49,10 +36,6 @@ class VideoModel(nn.Module):
         x = self.pool_temporal(x)
 
         return x
-
-
-# In[4]:
-
 
 class IG65MExtract:
     def __init__(self, frame_size = 112, pool_spatial = 'mean', pool_temporal = 'mean'):
@@ -105,23 +88,12 @@ class IG65MExtract:
 
 # In[5]:
 
+if __name__ == "__main__":
+    extractor = IG65MExtract()
+    faces_dir = Path('/impressionv2_faces/openface/')
+    videos = list(faces_dir.glob('*_face.mp4'))
 
-extractor = IG65MExtract()
-faces_dir = Path('/impressionv2_faces/openface/')
-videos = list(faces_dir.glob('*_face.mp4'))
-
-
-# In[6]:
-
-
-for video_path in tqdm(videos):
-    video_name = video_path.stem[:-5]
-    feature_path = faces_dir / f"{video_name}_ig65m.npy"
-    extractor.predict(video_path, feature_path)
-
-
-# In[ ]:
-
-
-
-
+    for video_path in tqdm(videos):
+        video_name = video_path.stem[:-5]
+        feature_path = faces_dir / f"{video_name}_ig65m.npy"
+        extractor.predict(video_path, feature_path)
