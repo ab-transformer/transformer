@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+# %%
 import sys
 from pathlib import Path
 
@@ -86,7 +88,7 @@ class IG65MExtract:
         np.save(features_path, np.array(features), allow_pickle=False)
 
 
-# In[5]:
+# %%
 
 if __name__ == "__main__":
     extractor = IG65MExtract()
