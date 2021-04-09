@@ -319,7 +319,17 @@ class NumpyDataset(th.utils.data.Dataset):
         return tuple(th.tensor(a[index]) for a in self.arrays)
 
     def __len__(self):
-        return self.tensors[0].size(0)
+        return self.arrays[0].shape[0]
+
+
+class FlattenZarrArray:
+    def __init__(self, arr):
+        self.arr = arr
+        self.shape = arr.shape
+
+    def __getitem__(self, idx):
+        a = self.arr[idx]
+        return np.reshape(a, (a.shape[0], -1))
 
 
 def load_resampled_impressionv2_dataset_all():
@@ -334,8 +344,8 @@ def load_resampled_impressionv2_dataset_all():
 
 
 def load_resampled_impressionv2_dataset_split(split):
-    f = zarr.open(IMPRESSIONV2_DIR / f"{split}.zarr")
-    return NumpyDataset(f.wav2vec2, f.r2plus1d, f.bert, f.y)
+    f = zarr.open(str(IMPRESSIONV2_DIR / f"{split}.zarr"))
+    return NumpyDataset(f.wav2vec2, FlattenZarrArray(f.r2plus1d), f.bert, f.y)
 
 
 # endregion
