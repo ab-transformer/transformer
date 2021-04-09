@@ -4,7 +4,7 @@ import random
 import numpy as np
 import torch as th
 
-from datasets import load_impressionv2_dataset_all
+from datasets import load_impressionv2_dataset_all, load_resampled_impressionv2_dataset_all
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", default="", type=str)
@@ -26,6 +26,11 @@ parser.add_argument(
 
 # Tasks
 parser.add_argument(
+    "--resampled",
+    action="store_true",
+    help="use the resampled dataset (default: False)",
+)
+parser.add_argument(
     "--vonly",
     action="store_true",
     help="use the crossmodal fusion into v (default: False)",
@@ -44,38 +49,38 @@ parser.add_argument(
     "--v_sample",
     type=int,
     default=None,
-    help="vision modality samples, if none all time steps are used",
+    help="vision modality samples, if none all time steps are used - Not available if resampled!",
 )
 parser.add_argument(
     "--a_sample",
     type=int,
     default=None,
-    help="audio modality samples, if none all time steps are used",
+    help="audio modality samples, if none all time steps are used - Not available if resampled!",
 )
 parser.add_argument(
     "--l_sample",
     type=int,
     default=None,
-    help="language modality samples, if none all time steps are used",
+    help="language modality samples, if none all time steps are used - Not available if resampled!",
 )
 parser.add_argument(
     "--random_sample",
     action="store_true",
-    help="take random time stamps instead of equally spaced ones",
+    help="take random time stamps instead of equally spaced ones - Not available if resampled!",
 )
 
 
 parser.add_argument(
-    "--audio_emb", type=str, default="lld", help="audio embedding (default: lld)"
+    "--audio_emb", type=str, default="lld", help="audio embedding (default: lld) - If resampled only wav2vec2 is supported!"
 )
 parser.add_argument(
     "--face_emb",
     type=str,
     default="resnet18",
-    help="face embedding (default: resnet18)",
+    help="face embedding (default: resnet18) - If resampled only ig65m is supported!",
 )
 parser.add_argument(
-    "--text_emb", type=str, default="bert", help="text embedding (default: bert)"
+    "--text_emb", type=str, default="bert", help="text embedding (default: bert) - If resampled only bert is supported!"
 )
 
 # parser.add_argument('--aligned', action='store_true',
@@ -175,15 +180,18 @@ elif valid_partial_mode != 1:
 del args.f
 hyp_params = args
 
-[train_ds, valid_ds, test_ds], target_names = load_impressionv2_dataset_all(
-    args.a_sample,
-    args.v_sample,
-    args.l_sample,
-    args.random_sample,
-    args.audio_emb,
-    args.face_emb,
-    args.text_emb,
-)
+if args.resampled:
+    [train_ds, valid_ds, test_ds], target_names = load_resampled_impressionv2_dataset_all()
+else:
+    [train_ds, valid_ds, test_ds], target_names = load_impressionv2_dataset_all(
+        args.a_sample,
+        args.v_sample,
+        args.l_sample,
+        args.random_sample,
+        args.audio_emb,
+        args.face_emb,
+        args.text_emb,
+    )
 
 # audio, face, text, label = next(iter(train_dl))
 audio, face, text, label = train_ds[0]

@@ -5,6 +5,7 @@ from typing import Tuple, Dict, List
 import numpy as np
 import pandas as pd
 import torch as th
+import zarr
 
 GT_NAMES = {
     "train": "annotation_training.pkl",
@@ -138,7 +139,7 @@ def load_impressionv2_dataset_split(
     videos = sorted(gt.keys())
     assert len(videos) == SET_SIZE[split]
 
-    audio_embs = {"lld": _get_lld_audio}
+    audio_embs = {"lld": _get_lld_audio, "wav2vec2": _get_wav2vec2_audio}
     face_embs = {"resnet18": _get_resnet18_face, "ig65m": _get_ig65m_face}
     text_embs = {"bert": _get_bert_text}
     audio_norm = audio_embs[audio_emb](split, videos)
@@ -222,6 +223,28 @@ def _normalize_lld_audio(audio_np: np.ndarray, file: Path, split: str) -> np.nda
 
 # endregion
 
+# region wav2vec2 audio
+def _get_wav2vec2_audio(split: str, videos: List[str]) -> np.ndarray:
+    file = IMPRESSIONV2_DIR / f"{split}_wav2vec2_audio.npy"
+    if not file.exists():
+        audio_dir = Path("/impressionv2_faces/audio/")
+        audio_paths = [audio_dir / f"{video}_wav2vec2.npy" for video in videos]
+        audio_np = _create_wav2vec2_audio(audio_paths)
+        np.save(file, audio_np)
+    else:
+        audio_np = np.load(file)
+    return audio_np
+
+
+def _create_wav2vec2_audio(video_paths: List[Path]) -> np.ndarray:
+    datas = [np.load(f) for f in video_paths]
+    datas = [d.reshape([-1, 768]) for d in datas]
+    datas = [np.pad(d, [(0, 764 - d.shape[0]), (0, 0)]) for d in datas]
+    return np.stack(datas)
+
+
+# endregion
+
 # region bert text
 def _get_bert_text(split: str, videos: List[str]) -> np.ndarray:
     file = IMPRESSIONV2_DIR / f"{split}_text.npy"
@@ -282,6 +305,37 @@ def _create_ig65m_face(video_paths: List[Path]) -> np.ndarray:
     video_list = [np.load(video) for video in video_paths]
     video_list_pad = [np.pad(a, [(0, 14 - a.shape[0]), (0, 0)]) for a in video_list]
     return np.stack(video_list_pad)
+
+
+# endregion
+
+# region rasampled dataset
+class NumpyDataset(th.utils.data.Dataset):
+    def __init__(self, *arrays):
+        self.arrays = arrays
+        assert len(np.unique([a.shape[0] for a in self.arrays])) == 1
+
+    def __getitem__(self, index):
+        return tuple(th.tensor(a[index]) for a in self.arrays)
+
+    def __len__(self):
+        return self.tensors[0].size(0)
+
+
+def load_resampled_impressionv2_dataset_all():
+    _, target_names = _get_gt("valid")
+    return (
+        [
+            load_resampled_impressionv2_dataset_split(split)
+            for split in ["train", "valid", "test"]
+        ],
+        target_names,
+    )
+
+
+def load_resampled_impressionv2_dataset_split(split):
+    f = zarr.open(IMPRESSIONV2_DIR / f"{split}.zarr")
+    return NumpyDataset(f.wav2vec2, f.r2plus1d, f.bert, f.y)
 
 
 # endregion

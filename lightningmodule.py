@@ -6,7 +6,10 @@ from torch.nn import functional as F
 
 from models import MULTModel
 from loss import bell_loss, bell_mse_mae_loss
-from datasets import load_impressionv2_dataset_all
+from datasets import (
+    load_impressionv2_dataset_all,
+    load_resampled_impressionv2_dataset_all,
+)
 
 loss_dict = {"L2": F.mse_loss, "Bell": bell_loss, "BellL1L2": bell_mse_mae_loss}
 opt_dict = {"Adam": optim.Adam, "SGD": optim.SGD}
@@ -100,12 +103,36 @@ class MULTModelWarpedAll(MULTModelWarped):
         self.audio_emb = hyp_params.audio_emb
         self.face_emb = hyp_params.face_emb
         self.text_emb = hyp_params.text_emb
+        self.is_resampled_dataset = hyp_params.resampled
+
+        if self.is_resampled_dataset:
+            assert self.srA is None
+            assert self.srF is None
+            assert self.srT is None
+            assert not self.is_random
+            assert self.audio_emb == "wav2vec2"
+            assert self.face_emb == "ig65m"
+            assert self.text_emb == "bert"
 
     def prepare_data(self):
-        (
-            [self.train_ds, self.valid_ds, self.test_ds],
-            self.target_names,
-        ) = load_impressionv2_dataset_all(self.srA, self.srF, self.srT, self.is_random, self.audio_emb, self.face_emb, self.text_emb)
+        if self.is_resampled_dataset:
+            (
+                [self.train_ds, self.valid_ds, self.test_ds],
+                self.target_names,
+            ) = load_resampled_impressionv2_dataset_all()
+        else:
+            (
+                [self.train_ds, self.valid_ds, self.test_ds],
+                self.target_names,
+            ) = load_impressionv2_dataset_all(
+                self.srA,
+                self.srF,
+                self.srT,
+                self.is_random,
+                self.audio_emb,
+                self.face_emb,
+                self.text_emb,
+            )
 
     def train_dataloader(self):
         return th.utils.data.DataLoader(
