@@ -4,7 +4,7 @@ import random
 import numpy as np
 import torch as th
 
-from datasets import load_impressionv2_dataset_all, load_resampled_impressionv2_dataset_all
+from datasets import load_impressionv2_dataset_all, load_resampled_impressionv2_dataset_all, load_report_impressionv2_dataset_all
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", default="", type=str)
@@ -25,6 +25,12 @@ parser.add_argument(
 )
 
 # Tasks
+parser.add_argument(
+    "--dataset",
+    type=str,
+    default="impressionV2",
+    help="name of the dataset (impressionV2, report)",
+)
 parser.add_argument(
     "--resampled",
     action="store_true",
@@ -180,18 +186,23 @@ elif valid_partial_mode != 1:
 del args.f
 hyp_params = args
 
-if args.resampled:
-    [train_ds, valid_ds, test_ds], target_names = load_resampled_impressionv2_dataset_all()
+if hyp_params.dataset == "impressionV2":
+    if args.resampled:
+        [train_ds, valid_ds, test_ds], target_names = load_resampled_impressionv2_dataset_all()
+    else:
+        [train_ds, valid_ds, test_ds], target_names = load_impressionv2_dataset_all(
+            args.a_sample,
+            args.v_sample,
+            args.l_sample,
+            args.random_sample,
+            args.audio_emb,
+            args.face_emb,
+            args.text_emb,
+        )
+elif hyp_params.dataset == "report":
+    train_ds, valid_ds, test_ds = load_report_impressionv2_dataset_all()
 else:
-    [train_ds, valid_ds, test_ds], target_names = load_impressionv2_dataset_all(
-        args.a_sample,
-        args.v_sample,
-        args.l_sample,
-        args.random_sample,
-        args.audio_emb,
-        args.face_emb,
-        args.text_emb,
-    )
+    raise "Dataset not supported!"
 
 # audio, face, text, label = next(iter(train_dl))
 audio, face, text, label = train_ds[0]

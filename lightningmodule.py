@@ -9,6 +9,7 @@ from loss import bell_loss, bell_mse_mae_loss
 from datasets import (
     load_impressionv2_dataset_all,
     load_resampled_impressionv2_dataset_all,
+    load_report_impressionv2_dataset_all
 )
 
 loss_dict = {"L2": F.mse_loss, "Bell": bell_loss, "BellL1L2": bell_mse_mae_loss}
@@ -92,7 +93,7 @@ class MULTModelWarped(pl.LightningModule):
 
 class MULTModelWarpedAll(MULTModelWarped):
     def __init__(self, hyp_params, early_stopping):
-        super().__init__(hyp_params, None, early_stopping)
+        super().__init__(hyp_params, "OCEAN", early_stopping)
         self.batch_size = hyp_params.batch_size
         self.shuffle = hyp_params.shuffle
 
@@ -104,6 +105,7 @@ class MULTModelWarpedAll(MULTModelWarped):
         self.face_emb = hyp_params.face_emb
         self.text_emb = hyp_params.text_emb
         self.is_resampled_dataset = hyp_params.resampled
+        self.dataset = hyp_params.dataset
 
         if self.is_resampled_dataset:
             assert self.srA is None
@@ -115,24 +117,29 @@ class MULTModelWarpedAll(MULTModelWarped):
             assert self.text_emb == "bert"
 
     def prepare_data(self):
-        if self.is_resampled_dataset:
-            (
-                [self.train_ds, self.valid_ds, self.test_ds],
-                self.target_names,
-            ) = load_resampled_impressionv2_dataset_all()
+        if self.dataset == "impressionV2":
+            if self.is_resampled_dataset:
+                (
+                    [self.train_ds, self.valid_ds, self.test_ds],
+                    self.target_names,
+                ) = load_resampled_impressionv2_dataset_all()
+            else:
+                (
+                    [self.train_ds, self.valid_ds, self.test_ds],
+                    self.target_names,
+                ) = load_impressionv2_dataset_all(
+                    self.srA,
+                    self.srF,
+                    self.srT,
+                    self.is_random,
+                    self.audio_emb,
+                    self.face_emb,
+                    self.text_emb,
+                )
+        elif self.dataset == "report":
+            self.train_ds, self.valid_ds, self.test_ds = load_report_impressionv2_dataset_all()
         else:
-            (
-                [self.train_ds, self.valid_ds, self.test_ds],
-                self.target_names,
-            ) = load_impressionv2_dataset_all(
-                self.srA,
-                self.srF,
-                self.srT,
-                self.is_random,
-                self.audio_emb,
-                self.face_emb,
-                self.text_emb,
-            )
+            raise "Dataset not supported!"
 
     def train_dataloader(self):
         return th.utils.data.DataLoader(
@@ -145,10 +152,10 @@ class MULTModelWarpedAll(MULTModelWarped):
 
     def val_dataloader(self):
         return th.utils.data.DataLoader(
-            self.valid_ds, num_workers=1, batch_size=self.batch_size, pin_memory=True,
+            self.valid_ds, num_workers=0, batch_size=self.batch_size, pin_memory=True,
         )
 
     def test_dataloader(self):
         return th.utils.data.DataLoader(
-            self.test_ds, num_workers=1, batch_size=self.batch_size, pin_memory=True,
+            self.test_ds, num_workers=0, batch_size=self.batch_size, pin_memory=True,
         )

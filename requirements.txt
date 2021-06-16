@@ -21,4 +21,4 @@ zarr==2.7.0
 #ig65m
 einops==0.1.0
 #vggish
-vggish-keras==0.0.12
+# vggish-keras==0.0.12

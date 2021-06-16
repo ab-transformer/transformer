@@ -18,6 +18,46 @@ SET_SIZE = {"train": 6000, "valid": 2000, "test": 2000}
 IMPRESSIONV2_DIR = Path("/impressionv2")
 EMBEDDING_DIR = Path("/mbalazsdb")
 
+REPORT_IMPRESSIONV2_DIR = Path("/workspace/lld_au_bert")
+
+
+class ReportImpressionV2DataSet(th.utils.data.Dataset):
+    def __init__(self, data):
+        self.data = data
+
+    def __getitem__(self, index):
+        (a, v, t), label = self.data[index]
+        a = np.pad(a, [(0, 1526 - a.shape[0]), (0, 0)])
+        v = np.pad(v, [(0, 459 - v.shape[0]), (0, 0)])
+        t = np.pad(t, [(0, 116 - t.shape[0]), (0, 0)])
+        a = a.astype('float32')
+        v = v.astype('float32')
+        t = t.astype('float32')
+        label = label.astype('float32')
+        # print(f"a.shape: {a.shape}")
+        # print(f"v.shape: {v.shape}")
+        # print(f"t.shape: {t.shape}")
+        return a, v, t, label
+
+    def __len__(self):
+        return len(self.data)
+
+
+def load_report_impressionv2_dataset_all() -> List[th.utils.data.Dataset]:
+    train_ds = load_report_impressionv2_dataset_split("train")
+    valid_ds = load_report_impressionv2_dataset_split("valid")
+    test_ds = load_report_impressionv2_dataset_split("test")
+    return [train_ds, valid_ds, test_ds]
+
+
+def load_report_impressionv2_dataset_split(split: str,) -> th.utils.data.Dataset:
+
+    file_name = f"fi_{split}_lld_au_bert.pkl"
+    with open(REPORT_IMPRESSIONV2_DIR / file_name, "rb") as f:
+        data = pickle.load(f)
+
+    return ReportImpressionV2DataSet(data)
+
 
 class TensorDatasetWithTransformer(th.utils.data.Dataset):
     def __init__(self, tensor_dataset, transform=None):
