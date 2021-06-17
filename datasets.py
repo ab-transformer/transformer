@@ -83,7 +83,7 @@ def load_report_impressionv2_dataset_split(
         data = pickle.load(f)
 
     if is_norm:
-        norms = np.load("norms")
+        norms = np.load("norms.npz")
         trfs = Compose([NormAVModalities(**norms), Padd3Modalities()])
     else:
         trfs = Padd3Modalities()
