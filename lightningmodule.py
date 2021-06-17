@@ -106,6 +106,7 @@ class MULTModelWarpedAll(MULTModelWarped):
         self.text_emb = hyp_params.text_emb
         self.is_resampled_dataset = hyp_params.resampled
         self.dataset = hyp_params.dataset
+        self.is_norm = hyp_params.norm
 
         if self.is_resampled_dataset:
             assert self.srA is None
@@ -137,7 +138,7 @@ class MULTModelWarpedAll(MULTModelWarped):
                     self.text_emb,
                 )
         elif self.dataset == "report":
-            self.train_ds, self.valid_ds, self.test_ds = load_report_impressionv2_dataset_all()
+            self.train_ds, self.valid_ds, self.test_ds = load_report_impressionv2_dataset_all(self.is_norm)
         else:
             raise "Dataset not supported!"
 

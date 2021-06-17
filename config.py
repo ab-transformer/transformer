@@ -32,6 +32,11 @@ parser.add_argument(
     help="name of the dataset (impressionV2, report)",
 )
 parser.add_argument(
+    "--norm",
+    action="store_true",
+    help="normalize audio and visual modalities (default: False)",
+)
+parser.add_argument(
     "--resampled",
     action="store_true",
     help="use the resampled dataset (default: False)",
@@ -188,7 +193,7 @@ hyp_params = args
 
 if hyp_params.dataset == "impressionV2":
     if args.resampled:
-        [train_ds, valid_ds, test_ds], target_names = load_resampled_impressionv2_dataset_all()
+        [train_ds, valid_ds, test_ds], target_names = load_resampled_impressionv2_dataset_all(args.norm)
     else:
         [train_ds, valid_ds, test_ds], target_names = load_impressionv2_dataset_all(
             args.a_sample,

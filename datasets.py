@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import torch as th
 import zarr
+from torchvision.transforms import Normalize
 
 GT_NAMES = {
     "train": "annotation_training.pkl",
@@ -22,41 +23,69 @@ REPORT_IMPRESSIONV2_DIR = Path("/workspace/lld_au_bert")
 
 
 class ReportImpressionV2DataSet(th.utils.data.Dataset):
-    def __init__(self, data):
+    def __init__(self, data, trfs):
         self.data = data
+        self.trfs = trfs
 
     def __getitem__(self, index):
         (a, v, t), label = self.data[index]
         a = np.pad(a, [(0, 1526 - a.shape[0]), (0, 0)])
         v = np.pad(v, [(0, 459 - v.shape[0]), (0, 0)])
         t = np.pad(t, [(0, 116 - t.shape[0]), (0, 0)])
-        a = a.astype('float32')
-        v = v.astype('float32')
-        t = t.astype('float32')
-        label = label.astype('float32')
-        # print(f"a.shape: {a.shape}")
-        # print(f"v.shape: {v.shape}")
-        # print(f"t.shape: {t.shape}")
+        a = a.astype("float32")
+        v = v.astype("float32")
+        t = t.astype("float32")
+        label = label.astype("float32")
+        if self.trfs is not None:
+            a, v, t = self.trfs(a, t, v)
         return a, v, t, label
 
     def __len__(self):
         return len(self.data)
 
 
-def load_report_impressionv2_dataset_all() -> List[th.utils.data.Dataset]:
-    train_ds = load_report_impressionv2_dataset_split("train")
-    valid_ds = load_report_impressionv2_dataset_split("valid")
-    test_ds = load_report_impressionv2_dataset_split("test")
+class NormAVModalities(th.nn.Module):
+    def __init__(self, a_mean, a_std, v_mean, v_std):
+        self.a_norm = Normalize(a_mean, a_std)
+        self.v_norm = Normalize(v_mean, v_std)
+
+    def forward(self, a, v, t):
+        return self.a_norm(a), self.v_norm(v), t
+
+class Padd3Modalities(th.nn.Module):
+    def __init__(self):
+        self.a_pad = Padding(1526)
+        self.v_pad = Padding(459)
+        self.t_pad = Padding(116)
+
+class Padding(th.nn.Module):
+    def __init__(self, pad_to_size):
+        self.pad_to_size = pad_to_size
+
+    def forward(self, data):
+        return np.pad(data, [(0, self.pad_to_size - data.shape[0]), (0, 0)])
+
+
+def load_report_impressionv2_dataset_all(is_norm: bool) -> List[th.utils.data.Dataset]:
+    train_ds = load_report_impressionv2_dataset_split("train", is_norm)
+    valid_ds = load_report_impressionv2_dataset_split("valid", is_norm)
+    test_ds = load_report_impressionv2_dataset_split("test", is_norm)
     return [train_ds, valid_ds, test_ds]
 
 
-def load_report_impressionv2_dataset_split(split: str,) -> th.utils.data.Dataset:
-
+def load_report_impressionv2_dataset_split(
+    split: str, is_norm: bool
+) -> th.utils.data.Dataset:
     file_name = f"fi_{split}_lld_au_bert.pkl"
     with open(REPORT_IMPRESSIONV2_DIR / file_name, "rb") as f:
         data = pickle.load(f)
 
-    return ReportImpressionV2DataSet(data)
+    if is_norm:
+        norms = np.load("norms")
+        trfs = NormAVModalities(**norms)
+    else:
+        trfs = None
+    return ReportImpressionV2DataSet(data, trfs)
 
 
 class TensorDatasetWithTransformer(th.utils.data.Dataset):
