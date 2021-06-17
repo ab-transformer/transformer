@@ -1,12 +1,11 @@
 import pickle
 from pathlib import Path
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Callable
 
 import numpy as np
 import pandas as pd
 import torch as th
 import zarr
-from torchvision.transforms import Normalize, Compose
 
 GT_NAMES = {
     "train": "annotation_training.pkl",
@@ -29,42 +28,63 @@ class ReportImpressionV2DataSet(th.utils.data.Dataset):
 
     def __getitem__(self, index):
         (a, v, t), label = self.data[index]
+        if self.trfs is not None:
+            a, v, t = self.trfs(a, v, t)
         a = a.astype("float32")
         v = v.astype("float32")
         t = t.astype("float32")
         label = label.astype("float32")
-        if self.trfs is not None:
-            a, v, t = self.trfs(a, t, v)
         return a, v, t, label
 
     def __len__(self):
         return len(self.data)
 
 
-class NormAVModalities(th.nn.Module):
-    def __init__(self, a_mean, a_std, v_mean, v_std):
-        self.a_norm = Normalize(a_mean, a_std)
-        self.v_norm = Normalize(v_mean, v_std)
+class Pipeline:
+    def __init__(self, callables: List[Callable]):
+        self.callables = callables
 
-    def forward(self, a, v, t):
+    def __call__(self, *args):
+        data = args
+        for c in self.callables:
+            data = c(*data)
+        return data
+
+
+class NormAVModalities:
+    def __init__(self, a_mean, a_std, v_mean, v_std):
+        super().__init__()
+        self.a_norm = Normalizing(a_mean, a_std)
+        self.v_norm = Normalizing(v_mean, v_std)
+
+    def __call__(self, a, v, t):
         return self.a_norm(a), self.v_norm(v), t
 
 
-class Padd3Modalities(th.nn.Module):
+class Normalizing:
+    def __init__(self, mean, std):
+        self.mean = mean
+        self.std = std
+
+    def __call__(self, data):
+        return (data - self.mean) / self.std
+
+
+class Padd3Modalities:
     def __init__(self):
         self.a_pad = Padding(1526)
         self.v_pad = Padding(459)
         self.t_pad = Padding(116)
 
-    def forward(self, a, v, t):
+    def __call__(self, a, v, t):
         return self.a_pad(a), self.v_pad(v), self.t_pad(t)
 
 
-class Padding(th.nn.Module):
+class Padding:
     def __init__(self, pad_to_size):
         self.pad_to_size = pad_to_size
 
-    def forward(self, data):
+    def __call__(self, data):
         return np.pad(data, [(0, self.pad_to_size - data.shape[0]), (0, 0)])
 
 
@@ -84,7 +104,7 @@ def load_report_impressionv2_dataset_split(
 
     if is_norm:
         norms = np.load("norms.npz")
-        trfs = Compose([NormAVModalities(**norms), Padd3Modalities()])
+        trfs = Pipeline([NormAVModalities(**norms), Padd3Modalities()])
     else:
         trfs = Padd3Modalities()
     return ReportImpressionV2DataSet(data, trfs)
