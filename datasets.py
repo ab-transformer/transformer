@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import torch as th
 import zarr
-from torchvision.transforms import Normalize
+from torchvision.transforms import Normalize, Compose
 
 GT_NAMES = {
     "train": "annotation_training.pkl",
@@ -29,9 +29,6 @@ class ReportImpressionV2DataSet(th.utils.data.Dataset):
 
     def __getitem__(self, index):
         (a, v, t), label = self.data[index]
-        a = np.pad(a, [(0, 1526 - a.shape[0]), (0, 0)])
-        v = np.pad(v, [(0, 459 - v.shape[0]), (0, 0)])
-        t = np.pad(t, [(0, 116 - t.shape[0]), (0, 0)])
         a = a.astype("float32")
         v = v.astype("float32")
         t = t.astype("float32")
@@ -52,11 +49,16 @@ class NormAVModalities(th.nn.Module):
     def forward(self, a, v, t):
         return self.a_norm(a), self.v_norm(v), t
 
+
 class Padd3Modalities(th.nn.Module):
     def __init__(self):
         self.a_pad = Padding(1526)
         self.v_pad = Padding(459)
         self.t_pad = Padding(116)
+
+    def forward(self, a, v, t):
+        return self.a_pad(a), self.v_pad(v), self.t_pad(t)
+
 
 class Padding(th.nn.Module):
     def __init__(self, pad_to_size):
@@ -82,9 +84,9 @@ def load_report_impressionv2_dataset_split(
 
     if is_norm:
         norms = np.load("norms")
-        trfs = NormAVModalities(**norms)
+        trfs = Compose([NormAVModalities(**norms), Padd3Modalities()])
     else:
-        trfs = None
+        trfs = Padd3Modalities()
     return ReportImpressionV2DataSet(data, trfs)
 
 
