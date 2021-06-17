@@ -193,7 +193,7 @@ hyp_params = args
 
 if hyp_params.dataset == "impressionV2":
     if args.resampled:
-        [train_ds, valid_ds, test_ds], target_names = load_resampled_impressionv2_dataset_all(args.norm)
+        [train_ds, valid_ds, test_ds], target_names = load_resampled_impressionv2_dataset_all()
     else:
         [train_ds, valid_ds, test_ds], target_names = load_impressionv2_dataset_all(
             args.a_sample,
@@ -205,7 +205,7 @@ if hyp_params.dataset == "impressionV2":
             args.text_emb,
         )
 elif hyp_params.dataset == "report":
-    train_ds, valid_ds, test_ds = load_report_impressionv2_dataset_all()
+    train_ds, valid_ds, test_ds = load_report_impressionv2_dataset_all(args.norm)
 else:
     raise "Dataset not supported!"
 
