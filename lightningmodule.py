@@ -145,7 +145,7 @@ class MULTModelWarpedAll(MULTModelWarped):
     def train_dataloader(self):
         return th.utils.data.DataLoader(
             self.train_ds,
-            num_workers=4,
+            num_workers=0,
             batch_size=self.batch_size,
             pin_memory=True,
             shuffle=self.shuffle,
