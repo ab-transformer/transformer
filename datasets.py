@@ -23,8 +23,8 @@ REPORT_IMPRESSIONV2_DIR = Path("/workspace/lld_au_bert")
 
 class ReportImpressionV2DataSet(th.utils.data.Dataset):
     def __init__(self, data, trfs):
-        self.data = list(map(self.process_data, data))
         self.trfs = trfs
+        self.data = list(map(self.process_data, data))
 
     def process_data(self, item):
         (a, v, t), label = item
