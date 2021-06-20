@@ -23,11 +23,11 @@ REPORT_IMPRESSIONV2_DIR = Path("/workspace/lld_au_bert")
 
 class ReportImpressionV2DataSet(th.utils.data.Dataset):
     def __init__(self, data, trfs):
-        self.data = data
+        self.data = map(self.process_data, data)
         self.trfs = trfs
 
-    def __getitem__(self, index):
-        (a, v, t), label = self.data[index]
+    def process_data(self, item):
+        (a, v, t), label = item
         if self.trfs is not None:
             a, v, t = self.trfs(a, v, t)
         a = a.astype("float32")
@@ -35,6 +35,9 @@ class ReportImpressionV2DataSet(th.utils.data.Dataset):
         t = t.astype("float32")
         label = label.astype("float32")
         return a, v, t, label
+
+    def __getitem__(self, index):
+        return self.data[index]
 
     def __len__(self):
         return len(self.data)
