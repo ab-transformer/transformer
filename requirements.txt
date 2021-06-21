@@ -17,6 +17,7 @@ comet-ml==3.4.0
 ray[tune]==1.2.0
 bayesian-optimization==1.2.0
 zarr==2.7.0
+pickle5==0.0.11
 
 #ig65m
 einops==0.1.0
