@@ -9,7 +9,8 @@ from loss import bell_loss, bell_mse_mae_loss
 from datasets import (
     load_impressionv2_dataset_all,
     load_resampled_impressionv2_dataset_all,
-    load_report_impressionv2_dataset_all
+    load_report_impressionv2_dataset_all,
+    load_report_mosi_dataset_all
 )
 
 loss_dict = {"L2": F.mse_loss, "Bell": bell_loss, "BellL1L2": bell_mse_mae_loss}
@@ -139,6 +140,8 @@ class MULTModelWarpedAll(MULTModelWarped):
                 )
         elif self.dataset == "report":
             self.train_ds, self.valid_ds, self.test_ds = load_report_impressionv2_dataset_all(self.is_norm)
+        elif self.dataset == "mosi":
+            self.train_ds, self.valid_ds, self.test_ds = load_report_mosi_dataset_all(self.is_norm)
         else:
             raise "Dataset not supported!"
 

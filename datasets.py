@@ -113,6 +113,22 @@ def load_report_impressionv2_dataset_split(
     return ReportImpressionV2DataSet(data, trfs)
 
 
+def load_report_mosi_dataset_all(is_norm: bool) -> List[th.utils.data.Dataset]:
+    file_name = "mosi_of_os_bert.pkl"
+    with open(REPORT_IMPRESSIONV2_DIR / file_name, "rb") as f:
+        data = pickle.load(f)
+
+    if is_norm:
+        norms = np.load("mosi_norms.npz")
+        trfs = Pipeline([NormAVModalities(**norms)])
+    else:
+        trfs = None
+    return [
+        ReportImpressionV2DataSet(data[split], trfs)
+        for split in ["train", "valid", "test"]
+    ]
+
+
 class TensorDatasetWithTransformer(th.utils.data.Dataset):
     def __init__(self, tensor_dataset, transform=None):
         self.tensor_dataset = tensor_dataset

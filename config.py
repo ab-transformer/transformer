@@ -4,7 +4,7 @@ import random
 import numpy as np
 import torch as th
 
-from datasets import load_impressionv2_dataset_all, load_resampled_impressionv2_dataset_all, load_report_impressionv2_dataset_all
+from datasets import load_impressionv2_dataset_all, load_resampled_impressionv2_dataset_all, load_report_impressionv2_dataset_all, load_report_mosi_dataset_all
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", default="", type=str)
@@ -206,6 +206,8 @@ if hyp_params.dataset == "impressionV2":
         )
 elif hyp_params.dataset == "report":
     train_ds, valid_ds, test_ds = load_report_impressionv2_dataset_all(args.norm)
+elif hyp_params.dataset == "mosi":
+    train_ds, valid_ds, test_ds = load_report_mosi_dataset_all(args.norm)
 else:
     raise "Dataset not supported!"
 
