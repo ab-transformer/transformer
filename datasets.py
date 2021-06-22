@@ -31,7 +31,7 @@ class ReportImpressionV2DataSet(th.utils.data.Dataset):
         return list(map(self.process_data, data))
 
     def process_data(self, item):
-        a, v, t, label = self.unpack(item)
+        a, v, t, label = self.unpack(item)        
         if self.trfs is not None:
             a, v, t = self.trfs(a, v, t)
         a = a.astype("float32")
@@ -61,7 +61,7 @@ class ReportMOSIDataSet(ReportImpressionV2DataSet):
         )
 
     def unpack(self, item):
-        return item
+        return item[0], item[1], item[2], item[3].flatten()
 
 
 class Pipeline:

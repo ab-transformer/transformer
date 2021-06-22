@@ -10,7 +10,7 @@ from datasets import (
     load_impressionv2_dataset_all,
     load_resampled_impressionv2_dataset_all,
     load_report_impressionv2_dataset_all,
-    load_report_mosi_dataset_all
+    load_report_mosi_dataset_all,
 )
 
 loss_dict = {"L2": F.mse_loss, "Bell": bell_loss, "BellL1L2": bell_mse_mae_loss}
@@ -86,6 +86,9 @@ class MULTModelWarped(pl.LightningModule):
         return metric_values
 
     def _calc_mae1_columnwise(self, y_hat, y):
+        if self.target_names is None:
+            return {}
+
         return {
             f"1mae_{name}": self.mae_1(y_hat[:, i], y[:, i])
             for i, name in enumerate(self.target_names)
@@ -94,7 +97,9 @@ class MULTModelWarped(pl.LightningModule):
 
 class MULTModelWarpedAll(MULTModelWarped):
     def __init__(self, hyp_params, early_stopping):
-        super().__init__(hyp_params, "OCEAN", early_stopping)
+        super().__init__(
+            hyp_params, self.get_target_names(hyp_params.dataset), early_stopping
+        )
         self.batch_size = hyp_params.batch_size
         self.shuffle = hyp_params.shuffle
 
@@ -118,6 +123,16 @@ class MULTModelWarpedAll(MULTModelWarped):
             assert self.face_emb == "ig65m"
             assert self.text_emb == "bert"
 
+    def get_target_names(self, dataset):
+        if dataset == "impressionV2":
+            raise "not implemented!"
+        elif dataset == "report":
+            return "OCEAN"
+        elif dataset == "mosi":
+            return None
+        else:
+            raise "Dataset not supported!"
+
     def prepare_data(self):
         if self.dataset == "impressionV2":
             if self.is_resampled_dataset:
@@ -139,9 +154,15 @@ class MULTModelWarpedAll(MULTModelWarped):
                     self.text_emb,
                 )
         elif self.dataset == "report":
-            self.train_ds, self.valid_ds, self.test_ds = load_report_impressionv2_dataset_all(self.is_norm)
+            (
+                self.train_ds,
+                self.valid_ds,
+                self.test_ds,
+            ) = load_report_impressionv2_dataset_all(self.is_norm)
         elif self.dataset == "mosi":
-            self.train_ds, self.valid_ds, self.test_ds = load_report_mosi_dataset_all(self.is_norm)
+            self.train_ds, self.valid_ds, self.test_ds = load_report_mosi_dataset_all(
+                self.is_norm
+            )
         else:
             raise "Dataset not supported!"
 
