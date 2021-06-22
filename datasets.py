@@ -25,10 +25,13 @@ REPORT_IMPRESSIONV2_DIR = Path("/workspace/lld_au_bert")
 class ReportImpressionV2DataSet(th.utils.data.Dataset):
     def __init__(self, data, trfs):
         self.trfs = trfs
-        self.data = list(map(self.process_data, data))
+        self.data = self.call_preprocess(data)
+
+    def call_preprocess(self, data):
+        return list(map(self.process_data, data))
 
     def process_data(self, item):
-        (a, v, t), label = item
+        a, v, t, label = self.unpack(item)
         if self.trfs is not None:
             a, v, t = self.trfs(a, v, t)
         a = a.astype("float32")
@@ -37,11 +40,28 @@ class ReportImpressionV2DataSet(th.utils.data.Dataset):
         label = label.astype("float32")
         return a, v, t, label
 
+    def unpack(self, item):
+        (a, v, t), label = item
+        return a, v, t, label
+
     def __getitem__(self, index):
         return self.data[index]
 
     def __len__(self):
         return len(self.data)
+
+
+class ReportMOSIDataSet(ReportImpressionV2DataSet):
+    def call_preprocess(self, data):
+        return list(
+            map(
+                self.process_data,
+                zip(data["audio"], data["vision"], data["text"], data["labels"]),
+            )
+        )
+
+    def unpack(self, item):
+        return item
 
 
 class Pipeline:
@@ -125,8 +145,7 @@ def load_report_mosi_dataset_all(is_norm: bool) -> List[th.utils.data.Dataset]:
     else:
         trfs = None
     return [
-        ReportImpressionV2DataSet(data[split], trfs)
-        for split in ["train", "valid", "test"]
+        ReportMOSIDataSet(data[split], trfs) for split in ["train", "valid", "test"]
     ]
 
 
