@@ -1,4 +1,5 @@
 import pickle
+import pickle5
 from pathlib import Path
 from typing import Tuple, Dict, List, Callable
 
@@ -116,7 +117,7 @@ def load_report_impressionv2_dataset_split(
 def load_report_mosi_dataset_all(is_norm: bool) -> List[th.utils.data.Dataset]:
     file_name = "mosi_of_os_bert.pkl"
     with open(REPORT_IMPRESSIONV2_DIR / file_name, "rb") as f:
-        data = pickle.load(f)
+        data = pickle5.load(f)
 
     if is_norm:
         norms = np.load("mosi_norms.npz")
