@@ -11,6 +11,7 @@ from datasets import (
     load_resampled_impressionv2_dataset_all,
     load_report_impressionv2_dataset_all,
     load_report_mosi_dataset_all,
+    load_report_mosei_dataset_all,
 )
 
 loss_dict = {"L2": F.mse_loss, "Bell": bell_loss, "BellL1L2": bell_mse_mae_loss}
@@ -130,6 +131,8 @@ class MULTModelWarpedAll(MULTModelWarped):
             return "OCEAN"
         elif dataset == "mosi":
             return None
+        elif dataset == "mosei":
+            return ["happy", "sad", "anger", "surprise", "disgust", "fear"]
         else:
             raise "Dataset not supported!"
 
@@ -161,6 +164,10 @@ class MULTModelWarpedAll(MULTModelWarped):
             ) = load_report_impressionv2_dataset_all(self.is_norm)
         elif self.dataset == "mosi":
             self.train_ds, self.valid_ds, self.test_ds = load_report_mosi_dataset_all(
+                self.is_norm
+            )
+        elif self.dataset == "mosei":
+            self.train_ds, self.valid_ds, self.test_ds = load_report_mosei_dataset_all(
                 self.is_norm
             )
         else:

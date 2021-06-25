@@ -11,3 +11,4 @@ ray_results/*
 *.npy
 *.pt
 *ckpt
+rachid/*

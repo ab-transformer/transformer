@@ -31,7 +31,7 @@ class ReportImpressionV2DataSet(th.utils.data.Dataset):
         return list(map(self.process_data, data))
 
     def process_data(self, item):
-        a, v, t, label = self.unpack(item)        
+        a, v, t, label = self.unpack(item)
         if self.trfs is not None:
             a, v, t = self.trfs(a, v, t)
         a = a.astype("float32")
@@ -141,6 +141,21 @@ def load_report_mosi_dataset_all(is_norm: bool) -> List[th.utils.data.Dataset]:
 
     if is_norm:
         norms = np.load("mosi_norms.npz")
+        trfs = Pipeline([NormAVModalities(**norms)])
+    else:
+        trfs = None
+    return [
+        ReportMOSIDataSet(data[split], trfs) for split in ["train", "valid", "test"]
+    ]
+
+
+def load_report_mosei_dataset_all(is_norm: bool) -> List[th.utils.data.Dataset]:
+    file_name = "mosei_of_os_bert_emotions.pkl"
+    with open(REPORT_IMPRESSIONV2_DIR / file_name, "rb") as f:
+        data = pickle5.load(f)
+
+    if is_norm:
+        norms = np.load("mosei_norms.npz")
         trfs = Pipeline([NormAVModalities(**norms)])
     else:
         trfs = None

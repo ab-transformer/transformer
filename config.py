@@ -4,7 +4,13 @@ import random
 import numpy as np
 import torch as th
 
-from datasets import load_impressionv2_dataset_all, load_resampled_impressionv2_dataset_all, load_report_impressionv2_dataset_all, load_report_mosi_dataset_all
+from datasets import (
+    load_impressionv2_dataset_all,
+    load_resampled_impressionv2_dataset_all,
+    load_report_impressionv2_dataset_all,
+    load_report_mosi_dataset_all,
+    load_report_mosei_dataset_all,
+)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", default="", type=str)
@@ -82,7 +88,10 @@ parser.add_argument(
 
 
 parser.add_argument(
-    "--audio_emb", type=str, default="lld", help="audio embedding (default: lld) - If resampled only wav2vec2 is supported!"
+    "--audio_emb",
+    type=str,
+    default="lld",
+    help="audio embedding (default: lld) - If resampled only wav2vec2 is supported!",
 )
 parser.add_argument(
     "--face_emb",
@@ -91,7 +100,10 @@ parser.add_argument(
     help="face embedding (default: resnet18) - If resampled only ig65m is supported!",
 )
 parser.add_argument(
-    "--text_emb", type=str, default="bert", help="text embedding (default: bert) - If resampled only bert is supported!"
+    "--text_emb",
+    type=str,
+    default="bert",
+    help="text embedding (default: bert) - If resampled only bert is supported!",
 )
 
 # parser.add_argument('--aligned', action='store_true',
@@ -193,7 +205,10 @@ hyp_params = args
 
 if hyp_params.dataset == "impressionV2":
     if args.resampled:
-        [train_ds, valid_ds, test_ds], target_names = load_resampled_impressionv2_dataset_all()
+        (
+            [train_ds, valid_ds, test_ds],
+            target_names,
+        ) = load_resampled_impressionv2_dataset_all()
     else:
         [train_ds, valid_ds, test_ds], target_names = load_impressionv2_dataset_all(
             args.a_sample,
@@ -208,6 +223,8 @@ elif hyp_params.dataset == "report":
     train_ds, valid_ds, test_ds = load_report_impressionv2_dataset_all(args.norm)
 elif hyp_params.dataset == "mosi":
     train_ds, valid_ds, test_ds = load_report_mosi_dataset_all(args.norm)
+elif hyp_params.dataset == "mosei":
+    train_ds, valid_ds, test_ds = load_report_mosei_dataset_all(args.norm)
 else:
     raise "Dataset not supported!"
 
