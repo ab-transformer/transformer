@@ -7,7 +7,7 @@ from ray.tune.suggest.basic_variant import BasicVariantGenerator
 
 def train(c):
     subprocess.run(
-        f"python train_all.py --project_name report_mosi --lr 0.001 --shuffle --project_dim 32 --layers 4 --num_heads 8 --dataset mosei_sent --batch_size 16 --relu_dropout {c['relu_dropout']} --res_dropout {c['res_dropout']} --embed_dropout {c['embed_dropout']} --attn_dropout {c['attn_dropout']} --attn_dropout_a {c['attn_dropout_a']} --attn_dropout_v {c['attn_dropout_v']} --out_dropout {c['out_dropout']} --num_epochs 20 --norm".split(),
+        f"python train_all.py --project_name report_mosei --lr 0.001 --shuffle --project_dim 32 --layers 4 --num_heads 8 --dataset mosei_sent --batch_size 16 --relu_dropout {c['relu_dropout']} --res_dropout {c['res_dropout']} --embed_dropout {c['embed_dropout']} --attn_dropout {c['attn_dropout']} --attn_dropout_a {c['attn_dropout_a']} --attn_dropout_v {c['attn_dropout_v']} --out_dropout {c['out_dropout']} --num_epochs 20 --norm".split(),
         cwd="/workspace/transformer",
     )
 
