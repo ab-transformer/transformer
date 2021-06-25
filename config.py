@@ -10,6 +10,7 @@ from datasets import (
     load_report_impressionv2_dataset_all,
     load_report_mosi_dataset_all,
     load_report_mosei_dataset_all,
+    load_report_mosei_sent_dataset_all
 )
 
 parser = argparse.ArgumentParser()
@@ -225,6 +226,8 @@ elif hyp_params.dataset == "mosi":
     train_ds, valid_ds, test_ds = load_report_mosi_dataset_all(args.norm)
 elif hyp_params.dataset == "mosei":
     train_ds, valid_ds, test_ds = load_report_mosei_dataset_all(args.norm)
+elif hyp_params.dataset == "mosei_sent":
+    train_ds, valid_ds, test_ds = load_report_mosei_sent_dataset_all(args.norm)
 else:
     raise "Dataset not supported!"
 

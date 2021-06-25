@@ -164,6 +164,21 @@ def load_report_mosei_dataset_all(is_norm: bool) -> List[th.utils.data.Dataset]:
     ]
 
 
+def load_report_mosei_sent_dataset_all(is_norm: bool) -> List[th.utils.data.Dataset]:
+    file_name = "mosei_of_os_bert_sentiment.pkl"
+    with open(REPORT_IMPRESSIONV2_DIR / file_name, "rb") as f:
+        data = pickle5.load(f)
+
+    if is_norm:
+        norms = np.load("mosei_norms.npz")
+        trfs = Pipeline([NormAVModalities(**norms)])
+    else:
+        trfs = None
+    return [
+        ReportMOSIDataSet(data[split], trfs) for split in ["train", "valid", "test"]
+    ]
+
+
 class TensorDatasetWithTransformer(th.utils.data.Dataset):
     def __init__(self, tensor_dataset, transform=None):
         self.tensor_dataset = tensor_dataset
