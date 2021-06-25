@@ -7,16 +7,16 @@ from ray.tune.suggest.basic_variant import BasicVariantGenerator
 
 def train(c):
     subprocess.run(
-        f"python train_all.py --project_name report_mosi --lr 0.001 --shuffle --project_dim 50 --layers 4 --num_heads 10 --dataset mosi --batch_size 8 --relu_dropout {c['relu_dropout']} --res_dropout {c['res_dropout']} --embed_dropout {c['embed_dropout']} --attn_dropout {c['attn_dropout']} --attn_dropout_a {c['attn_dropout_a']} --attn_dropout_v {c['attn_dropout_v']} --out_dropout {c['out_dropout']} --num_epochs 100 --norm".split(),
+        f"python train_all.py --project_name report_mosi --lr 0.001 --shuffle --project_dim 32 --layers 4 --num_heads 8 --dataset mosei_sent --batch_size 16 --relu_dropout {c['relu_dropout']} --res_dropout {c['res_dropout']} --embed_dropout {c['embed_dropout']} --attn_dropout {c['attn_dropout']} --attn_dropout_a {c['attn_dropout_a']} --attn_dropout_v {c['attn_dropout_v']} --out_dropout {c['out_dropout']} --num_epochs 20 --norm".split(),
         cwd="/workspace/transformer",
     )
 
 
 org_config = {
-    "attn_dropout": 0.2,
+    "attn_dropout": 0.0,
     "attn_dropout_a": 0.1,
     "attn_dropout_v": 0.1,
-    "embed_dropout": 0.0,
+    "embed_dropout": 0.1,
     "out_dropout": 0.1,
     "relu_dropout": 0.1,
     "res_dropout": 0.1,
@@ -43,5 +43,5 @@ tune.run(
     config=search_space,
     resources_per_trial={"cpu": 16, "gpu": 1},
     search_alg=BasicVariantGenerator(points_to_evaluate=points_to_evaluate),
-    name="tune_mosi_dropouts",
+    name="tune_mosei_sent_dropouts",
 )
