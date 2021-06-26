@@ -44,4 +44,5 @@ tune.run(
     resources_per_trial={"cpu": 16, "gpu": 1},
     search_alg=BasicVariantGenerator(points_to_evaluate=points_to_evaluate),
     name="tune_mosei_sent_dropouts",
+    local_dir="ray_results",
 )
