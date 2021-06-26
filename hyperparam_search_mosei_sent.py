@@ -15,8 +15,8 @@ def train(c):
 org_config = {
     "attn_dropout": 0.0,
     "attn_dropout_a": 0.1,
-    "attn_dropout_v": 0.1,
-    "embed_dropout": 0.1,
+    "attn_dropout_v": 0.0,
+    "embed_dropout": 0.2,
     "out_dropout": 0.1,
     "relu_dropout": 0.1,
     "res_dropout": 0.1,
@@ -28,10 +28,10 @@ for k, v in org_config.items():
     if point[k] + 0.1 <= 1.0:
         point[k] += 0.1
         points_to_evaluate.append(point)
-    if point[k] - 0.1 > 0.0:
-        point = copy(org_config)
+    point = copy(org_config)
+    if point[k] - 0.1 >= 0.0:
         point[k] -= 0.1
-    points_to_evaluate.append(point)
+        points_to_evaluate.append(point)
 
 search_space = {k: tune.quniform(0, 0.5, 0.05) for k in org_config.keys()}
 
@@ -43,6 +43,6 @@ tune.run(
     config=search_space,
     resources_per_trial={"cpu": 16, "gpu": 1},
     search_alg=BasicVariantGenerator(points_to_evaluate=points_to_evaluate),
-    name="tune_mosei_sent_dropouts",
+    name="tune_mosei_sent_dropouts_embed",
     local_dir="ray_results",
 )
