@@ -33,6 +33,7 @@ class MULTModel(nn.Module):
 
         self.partial_mode = self.lonly + self.aonly + self.vonly
         if self.partial_mode == 1:
+            assert self.d_l == self.d_a == self.d_v
             combined_dim = 2 * self.d_l   # assuming d_l == d_a == d_v
         else:
             combined_dim = 2 * (self.d_l + self.d_a + self.d_v)

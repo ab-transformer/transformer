@@ -150,7 +150,7 @@ def load_report_mosi_dataset_all(is_norm: bool) -> List[th.utils.data.Dataset]:
 
 
 def load_report_mosei_dataset_all(is_norm: bool) -> List[th.utils.data.Dataset]:
-    file_name = "mosei_of_os_bert_emotions.pkl"
+    file_name = "mosei_of_os_bert_emotions_18k.pkl"
     with open(REPORT_IMPRESSIONV2_DIR / file_name, "rb") as f:
         data = pickle5.load(f)
 
@@ -165,7 +165,7 @@ def load_report_mosei_dataset_all(is_norm: bool) -> List[th.utils.data.Dataset]:
 
 
 def load_report_mosei_sent_dataset_all(is_norm: bool) -> List[th.utils.data.Dataset]:
-    file_name = "mosei_of_os_bert_sentiment.pkl"
+    file_name = "mosei_of_os_bert_sentiment_18k.pkl"
     with open(REPORT_IMPRESSIONV2_DIR / file_name, "rb") as f:
         data = pickle5.load(f)
 
