@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 import torch as th
 from torch import optim
-from pytorch_lightning.metrics import MeanAbsoluteError, Accuracy, F1, PearsonCorrcoef
+from torchmetrics import MeanAbsoluteError, Accuracy, F1, PearsonCorrcoef
 from torch.nn import functional as F
 
 from models import MULTModel
