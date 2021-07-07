@@ -111,8 +111,8 @@ class MULTModelWarped(pl.LightningModule):
         return y_hat_bin, y_bin
 
     def y2r(self, y_hat, y):
-        y_hat_r = th.round(y_hat)
-        y_r = th.round(y)
+        y_hat_r = th.round(y_hat).int()
+        y_r = th.round(y).int()
         return y_hat_r, y_r
 
     def _calc_acc2(self, y_hat, y):
