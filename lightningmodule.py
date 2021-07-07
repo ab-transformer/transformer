@@ -121,7 +121,7 @@ class MULTModelWarped(pl.LightningModule):
 
     def _calc_acc7(self, y_hat, y):
         y_hat_r, y_r = self.y2r(y_hat, y)
-        return self.acc7(y_hat_r, y_r)
+        return self.acc7(y_hat_r + 3, y_r + 3)
 
     def _calc_f1(self, y_hat, y):
         y_hat_bin, y_bin = self._y2bin(y_hat, y)
