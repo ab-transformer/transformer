@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 import torch as th
 from torch import optim
-from pytorch_lightning.metrics import MeanAbsoluteError
+from pytorch_lightning.metrics import MeanAbsoluteError, Accuracy, F1, PearsonCorrcoef
 from torch.nn import functional as F
 
 from models import MULTModel
@@ -29,6 +29,10 @@ class MULTModelWarped(pl.LightningModule):
         self.target_names = target_names
 
         self.mae_1 = 1 - MeanAbsoluteError()
+        self.acc2 = Accuracy()
+        self.acc7 = Accuracy(multiclass=True)
+        self.f1 = F1()
+        self.coef = PearsonCorrcoef()
         self.loss = loss_dict[hyp_params.loss_fnc]
         self.opt = opt_dict[hyp_params.optim]
 
@@ -85,6 +89,10 @@ class MULTModelWarped(pl.LightningModule):
         metric_values = self._calc_mae1_columnwise(y_hat, y)
         metric_values["loss"] = loss
         metric_values["1mae"] = self.mae_1(y_hat, y)
+        metric_values["acc2"] = self._calc_acc2(y_hat, y)
+        metric_values["acc7"] = self._calc_acc7(y_hat, y)
+        metric_values["f1"] = self._calc_f1(y_hat, y)
+        metric_values["corr"] = self._calc_corr()(y_hat, y)
         return metric_values
 
     def _calc_mae1_columnwise(self, y_hat, y):
@@ -95,6 +103,33 @@ class MULTModelWarped(pl.LightningModule):
             f"1mae_{name}": self.mae_1(y_hat[:, i], y[:, i])
             for i, name in enumerate(self.target_names)
         }
+
+    def _y2bin(self, y_hat, y):
+        mask = y_hat != 0
+        y_hat_bin = y_hat[mask] > 0.0
+        y_bin = y[mask] > 0.0
+        return y_hat_bin, y_bin
+
+    def y2r(self, y_hat, y):
+        y_hat_r = th.round(y_hat)
+        y_r = th.round(y)
+        return y_hat_r, y_r
+
+    def _calc_acc2(self, y_hat, y):
+        y_hat_bin, y_bin = self._y2bin(y_hat, y)
+        return self.acc2(y_hat_bin, y_bin)
+
+    def _calc_acc7(self, y_hat, y):
+        y_hat_r, y_r = self.y2r(y_hat, y)
+        return self.acc7(y_hat_r, y_r)
+
+    def _calc_f1(self, y_hat, y):
+        y_hat_bin, y_bin = self._y2bin(y_hat, y)
+        return self.f1(y_hat_bin, y_bin)
+
+    def _calc_corr(self, y_hat, y):
+        y_hat_r, y_r = self.y2r(y_hat, y)
+        return self.coef(y_hat_r, y_r)
 
 
 class MULTModelWarpedAll(MULTModelWarped):
