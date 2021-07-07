@@ -2,7 +2,7 @@ import pytorch_lightning as pl
 import torch as th
 import numpy as np
 from torch import optim
-from torchmetrics import MeanAbsoluteError, Accuracy, F1, PearsonCorrcoef
+from torchmetrics import MeanAbsoluteError, Accuracy, F1
 from torch.nn import functional as F
 
 from models import MULTModel
@@ -89,11 +89,13 @@ class MULTModelWarped(pl.LightningModule):
         loss = self.loss(y_hat, y)
         metric_values = self._calc_mae1_columnwise(y_hat, y)
         metric_values["loss"] = loss
-        metric_values["1mae"] = self.mae_1(y_hat, y)
-        metric_values["acc2"] = self._calc_acc2(y_hat, y)
-        metric_values["acc7"] = self._calc_acc7(y_hat, y)
-        metric_values["f1"] = self._calc_f1(y_hat, y)
-        metric_values["corr"] = self._calc_corr(y_hat, y)
+        y_hat_c = th.clamp(y_hat, -3, 3)
+        y_c = th.clamp(y, -3, 3)
+        metric_values["1mae"] = self.mae_1(y_hat_c, y_c)
+        metric_values["acc2"] = self._calc_acc2(y_hat_c, y_c)
+        metric_values["acc7"] = self._calc_acc7(y_hat_c, y_c)
+        metric_values["f1"] = self._calc_f1(y_hat_c, y_c)
+        metric_values["corr"] = self._calc_corr(y_hat_c, y_c)
         return metric_values
 
     def _calc_mae1_columnwise(self, y_hat, y):
@@ -122,7 +124,7 @@ class MULTModelWarped(pl.LightningModule):
 
     def _calc_acc7(self, y_hat, y):
         y_hat_r, y_r = self.y2r(y_hat, y)
-        return self.acc7(y_hat_r + 3, y_r + 3)
+        return self.acc7(y_hat_r + 10, y_r + 10)
 
     def _calc_f1(self, y_hat, y):
         y_hat_bin, y_bin = self._y2bin(y_hat, y)
