@@ -33,7 +33,6 @@ class MULTModelWarped(pl.LightningModule):
         self.acc2 = Accuracy()
         self.acc7 = Accuracy(multiclass=True)
         self.f1 = F1()
-        self.coef = PearsonCorrcoef()
         self.loss = loss_dict[hyp_params.loss_fnc]
         self.opt = opt_dict[hyp_params.optim]
 
