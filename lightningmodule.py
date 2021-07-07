@@ -92,7 +92,7 @@ class MULTModelWarped(pl.LightningModule):
         metric_values["acc2"] = self._calc_acc2(y_hat, y)
         metric_values["acc7"] = self._calc_acc7(y_hat, y)
         metric_values["f1"] = self._calc_f1(y_hat, y)
-        metric_values["corr"] = self._calc_corr()(y_hat, y)
+        metric_values["corr"] = self._calc_corr(y_hat, y)
         return metric_values
 
     def _calc_mae1_columnwise(self, y_hat, y):
