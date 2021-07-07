@@ -128,8 +128,7 @@ class MULTModelWarped(pl.LightningModule):
         return self.f1(y_hat_bin, y_bin)
 
     def _calc_corr(self, y_hat, y):
-        y_hat_r, y_r = self.y2r(y_hat, y)
-        return self.coef(y_hat_r, y_r)
+        return self.coef(y_hat, y)
 
 
 class MULTModelWarpedAll(MULTModelWarped):
