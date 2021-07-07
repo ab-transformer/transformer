@@ -1,5 +1,6 @@
 import pytorch_lightning as pl
 import torch as th
+import numpy as np
 from torch import optim
 from torchmetrics import MeanAbsoluteError, Accuracy, F1, PearsonCorrcoef
 from torch.nn import functional as F
@@ -128,7 +129,7 @@ class MULTModelWarped(pl.LightningModule):
         return self.f1(y_hat_bin, y_bin)
 
     def _calc_corr(self, y_hat, y):
-        return self.coef(y_hat, y)
+        return np.corrcoef(y.view(-1).cpu().detach().numpy(), y_hat.view(-1).cpu().detach().numpy())[0][1]
 
 
 class MULTModelWarpedAll(MULTModelWarped):

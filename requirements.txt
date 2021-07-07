@@ -13,7 +13,7 @@ torch-summary==1.4.5
 librosa==0.8.0
 transformers==4.3.3
 pytorch-lightning==1.2.2
-comet-ml==3.4.0
+comet-ml==3.12.2
 ray[tune]==1.2.0
 bayesian-optimization==1.2.0
 zarr==2.7.0
