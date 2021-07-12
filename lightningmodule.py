@@ -4,6 +4,7 @@ import numpy as np
 from torch import optim
 from torchmetrics import MeanAbsoluteError, Accuracy, F1
 from torch.nn import functional as F
+from sklearn.metrics import r2_score
 
 from models import MULTModel
 from loss import bell_loss, bell_mse_mae_loss
@@ -95,6 +96,7 @@ class MULTModelWarped(pl.LightningModule):
         metric_values["acc7"] = self._calc_acc7(y_hat_c, y_c)
         metric_values["f1"] = self._calc_f1(y_hat_c, y_c)
         metric_values["corr"] = self._calc_corr(y_hat_c, y_c)
+        metric_values["r2"] = self._calc_r2(y_hat_c, y_c)
         return metric_values
 
     def _calc_mae1_columnwise(self, y_hat, y):
@@ -112,17 +114,20 @@ class MULTModelWarped(pl.LightningModule):
         y_bin = y[mask] > 0.0
         return y_hat_bin, y_bin
 
-    def y2r(self, y_hat, y):
+    def _y2r(self, y_hat, y):
         y_hat_r = th.round(y_hat).int()
         y_r = th.round(y).int()
         return y_hat_r, y_r
+
+    def _y2np(self, y_hat, y):
+        return y.view(-1).cpu().detach().numpy(), y_hat.view(-1).cpu().detach().numpy()
 
     def _calc_acc2(self, y_hat, y):
         y_hat_bin, y_bin = self._y2bin(y_hat, y)
         return self.acc2(y_hat_bin, y_bin)
 
     def _calc_acc7(self, y_hat, y):
-        y_hat_r, y_r = self.y2r(y_hat, y)
+        y_hat_r, y_r = self._y2r(y_hat, y)
         return self.acc7(y_hat_r + 10, y_r + 10)
 
     def _calc_f1(self, y_hat, y):
@@ -131,6 +136,10 @@ class MULTModelWarped(pl.LightningModule):
 
     def _calc_corr(self, y_hat, y):
         return np.corrcoef(y.view(-1).cpu().detach().numpy(), y_hat.view(-1).cpu().detach().numpy())[0][1]
+
+    def _calc_r2(self, y_hat, y):
+        y_hat, y = self._y2np(y_hat, y)
+        return r2_score(y_hat, y)
 
 
 class MULTModelWarpedAll(MULTModelWarped):
