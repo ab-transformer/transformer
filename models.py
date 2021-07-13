@@ -35,6 +35,12 @@ class MULTModel(nn.Module):
         if self.partial_mode == 1:
             assert self.d_l == self.d_a == self.d_v
             combined_dim = 2 * self.d_l   # assuming d_l == d_a == d_v
+        elif self.lonly and self.aonly:
+            combined_dim = 2 * (self.d_l + self.d_a)
+        elif self.lonly and self.vonly:
+            combined_dim = 2 * (self.d_l + self.d_v)
+        elif self.aonly and self.vonly:
+            combined_dim = 2 * (self.d_a + self.d_v)
         else:
             combined_dim = 2 * (self.d_l + self.d_a + self.d_v)
         
@@ -140,6 +146,12 @@ class MULTModel(nn.Module):
         
         if self.partial_mode == 3:
             last_hs = torch.cat([last_h_l, last_h_a, last_h_v], dim=1)
+        elif self.lonly and self.aonly:
+            last_hs = torch.cat([last_h_l, last_h_a], dim=1)
+        elif self.lonly and self.vonly:
+            last_hs = torch.cat([last_h_l, last_h_v], dim=1)
+        elif self.aonly and self.vonly:
+            last_hs = torch.cat([last_h_a, last_h_v], dim=1)
         
         # A residual block
         last_hs_proj = self.proj2(F.dropout(F.relu(self.proj1(last_hs)), p=self.out_dropout, training=self.training))

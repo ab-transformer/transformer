@@ -198,8 +198,6 @@ valid_partial_mode = args.lonly + args.vonly + args.aonly
 
 if valid_partial_mode == 0:
     args.lonly = args.vonly = args.aonly = True
-elif valid_partial_mode != 1:
-    raise ValueError("You can only choose one of {l/v/a}only.")
 
 del args.f
 hyp_params = args
